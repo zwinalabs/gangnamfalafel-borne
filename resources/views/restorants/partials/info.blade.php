@@ -10,6 +10,7 @@
             ['ftype'=>'input','name'=>"Restaurant description",'id'=>"description",'placeholder'=>"Restaurant description",'required'=>true,'value'=>$restorant->description],
             ['ftype'=>'input','name'=>"Restaurant address",'id'=>"address",'placeholder'=>"Restaurant address",'required'=>true,'value'=>$restorant->address],
             ['ftype'=>'input','name'=>"Restaurant phone",'id'=>"phone",'placeholder'=>"Restaurant phone",'required'=>true,'value'=>$restorant->phone],
+            ['ftype'=>'input','name'=>"PIN Code",'id'=>"code_pin",'placeholder'=>"PIN Code",'required'=>true,'value'=>$restorant->code_pin],
         ]])
         @if(config('settings.multi_city'))
             @include('partials.fields',['fields'=>[

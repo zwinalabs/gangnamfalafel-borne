@@ -176,6 +176,7 @@ class RestorantController extends Controller
         $restaurant->lng = 0;
         $restaurant->address = '';
         $restaurant->phone = $owner->phone;
+        $restaurant->code_pin = $request->code_pin;
         $restaurant->subdomain = $this->makeAlias(strip_tags($request->name));
         $restaurant->save();
 
@@ -404,7 +405,7 @@ class RestorantController extends Controller
         
         $restaurant->address = strip_tags($request->address);
         $restaurant->phone = strip_tags($request->phone);
-        
+        $restaurant->code_pin = strip_tags($request->code_pin);
         $restaurant->description = strip_tags($request->description);
         $restaurant->minimum = strip_tags($request->minimum);
 
