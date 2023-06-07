@@ -223,6 +223,7 @@
     "Cash on delivery": "Cash on delivery",
     "Pay with card": "Pay with card",
     "Pay via iDeal": "Pay via iDeal",
+    "Pay via Card terminal": "Pay via Card terminal",
     "Place order": "Place order",
     "Name on card": "Name on card",
     "Submit payment": "Submit payment",
@@ -1192,6 +1193,7 @@
     "Cameroon": "Cameroon",
     "Canada": "Canada",
     "Cancel": "Cancel",
+    "Try again": "Try again",
     "Cancel Subscription": "Cancel Subscription",
     "Cape Verde": "Cape Verde",
     "Card": "Card",
@@ -1911,5 +1913,6 @@
     "Online": "Online",
     "English": "English",
     "French": "French",
-    "PIN Code": "PIN Code"
+    "PIN Code": "PIN Code",
+    "PIN Code invalide": "PIN Code not found"
 }

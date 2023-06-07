@@ -223,6 +223,7 @@
     "Cash on delivery": "Paiement à la livraison",
     "Pay with card": "Paiement par CB",
     "Pay via iDeal": "Payer via iDeal",
+    "Pay via Card terminal": "Payer via terminal de carte",
     "Place order": "Passer la commande",
     "Name on card": "Nom sur la carte",
     "Submit payment": "Soumettre le paiement",
@@ -1191,6 +1192,7 @@
     "Cameroon": "Cameroun",
     "Canada": "Canada",
     "Cancel": "Annuler",
+    "Try again": "Réessayer",
     "Cancel Subscription": "Arrêter l'abonnement",
     "Cape Verde": "Cap-Vert",
     "Card": "Carte",
@@ -1911,5 +1913,6 @@
     " Missing variants will have the same price as the item": " Les variantes manquantes auront le même prix que l'article",
     "English": "English",
     "French": "Français",
-    "PIN Code": "Code PIN"
+    "PIN Code": "Code PIN",
+    "PIN Code invalide": "Code PIN invalide"
 }
