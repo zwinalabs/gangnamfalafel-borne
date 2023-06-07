@@ -344,7 +344,7 @@ Route::post('call/waiter/', 'RestorantController@callWaiter')->name('call.waiter
 Route::get('new/driver/register', 'DriverController@register')->name('driver.register');
 Route::post('new/driver/register/store', 'DriverController@registerStore')->name('driver.register.store');
 
-Route::get('order/success', 'OrderController@success')->name('order.success');
+Route::get('order/success/{order?}', 'OrderController@success')->name('order.success');
 Route::get('order/successwhatsapp/{order}', 'OrderController@silentWhatsAppRedirect')->name('order.successwhatsapp');
 
 Route::get('order/cancel', 'OrderController@cancel')->name('order.cancel');
