@@ -392,6 +392,7 @@
         var TEMPLATE_USED="<?php echo config('settings.front_end_template','defaulttemplate') ?>";
         var DISPLAY_CADDY = "";
     </script>
+    <script src="<?php echo e(asset('custom')); ?>/js/metro.min.js"></script>
     <script src="<?php echo e(asset('custom')); ?>/js/order.js"></script>
     <?php echo $__env->make('restorants.phporderinterface', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?> 
     <?php if(isset($showGoogleTranslate)&&$showGoogleTranslate&&!$showLanguagesSelector): ?>
