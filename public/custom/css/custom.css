@@ -4289,14 +4289,14 @@ h5.modal-title {
     position: fixed;
     width: auto;
     height: auto;
-    opacity: .7;
+    opacity: .9;
     padding: 10px;
-    bottom: 2%;
-    right: 0;
+    top: 0%;
+    left: 4.5%;
     transform: translate(-50%,0);
     z-index: 999999;
 }
 .clear-reset-all button#clearAndReset{
-    background: #d2d6dc;
+    background:#03643b;
     border-radius: 50%;
 }
