@@ -256,7 +256,7 @@ var sendSignalTerminal = function() {
  }
 
  var showPaymentDetailsBorneModel = function() {
-    $('#checkoutBorneLoader').hide();
+    $('#checkoutBorneModal #checkoutBorneLoader').hide();
     $("#paymentDetailsBorneModal").show();
 }
 var hidePaymentDetailsBorneModel = function() {
@@ -266,7 +266,7 @@ var hidePaymentDetailsBorneModel = function() {
 var disableCheckoutBorneContent = function() {
     $('#checkoutBorneContent').css("pointer-events", "none");
     $('#checkoutBorneContent').css("opacity", "0.6");
-    $('#checkoutBorneLoader').show();
+    $('#checkoutBorneModal #checkoutBorneLoader').show();
 }
 var enableCheckoutBorneContent = function() {
     $('#checkoutBorneContent').css("pointer-events", "auto");
@@ -315,4 +315,29 @@ var clearResetAll = function(){
     hideCheckoutModel();
     successCallClear();
     setTimeout(() => { successCallClear(); }, "1000");
+}
+
+var tryAgainPayment = function(order_id=null){
+    $('#paymentDetailsBorneContent #checkoutBorneLoader').show();
+    axios.get('/order/success', {params: {order : order_id}})
+    .then(function(response) {
+        console.log(response);
+        $('#paymentDetailsBorneContent #checkoutBorneLoader').hide();
+        $("#paymentDetailsBorneContent").html(response.data.html);
+    }).finally(() => {
+        successCallClear();
+    });
+}
+
+var codePinCODPayment = function(order_id=null){
+    let code_pin = $("#rscode_pin").val();
+    $('#paymentDetailsBorneContent #checkoutBorneLoader').show();
+    axios.get('/order/success', {params: {order : order_id, rscode_pin: code_pin }})
+    .then(function(response) {
+        console.log(response);
+        $('#paymentDetailsBorneContent #checkoutBorneLoader').hide();
+        $("#paymentDetailsBorneContent").html(response.data.html);
+    }).finally(() => {
+        successCallClear();
+    });
 }
