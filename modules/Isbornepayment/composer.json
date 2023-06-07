@@ -1,0 +1,15 @@
+{
+    "name": "zwinalabs/isbornepayment",
+    "description": "custom module for restaurant borne",
+    "authors": [
+        {
+            "name": "Kais Chrif",
+            "email": "contact@gobiz.tn"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Modules\\Isbornepayment\\": ""
+        }
+    }
+}
