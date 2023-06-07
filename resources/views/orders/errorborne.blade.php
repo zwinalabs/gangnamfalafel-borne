@@ -1,10 +1,10 @@
 <div class="container">
-<div class="row justify-content-center">
+<div class="col-12 justify-content-center">
     <div  id="checkoutBorneLoader">
         <img class="eCards" alt="card icon" src="/custom/img/payment-processing.gif" >
     </div>
-        <div class="card shadow border-0 mt-1">
-                <div class="card-body text-center">
+        <div class="border-0 mt-1">
+                <div class=" text-center">
                     <div class="swal2-icon swal2-error swal2-animate-error-icon" style="display: flex;"><span class="swal2-x-mark"><span class="swal2-x-mark-line-left"></span><span class="swal2-x-mark-line-right"></span></span></div>
                     <h2 class="display-2 display-payment-success">{{ $errMsg }}</h2>
                     <h1 class="mb-4">

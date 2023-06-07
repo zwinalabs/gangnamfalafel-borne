@@ -84,14 +84,14 @@
                   @endif
                   --}}
                   @if(isset($hasGuestOrders)&&$hasGuestOrders)
-                    <li class="web-menu mr-1">
+                    {{-- <li class="web-menu mr-1">
                       <a  href="{{ route('guest.orders')}}" class="btn btn-neutral btn-icon btn-cart" style="cursor:pointer;">
                         <span class="btn-inner--icon">
                           <i class="fa fa-list-alt"></i>
                         </span>
                         <span class="nav-link-inner--text">{{ __('My Orders') }}</span>
                       </a>
-                    </li>
+                    </li> --}}
                   @endif
 
                   @if ($restorant->getConfig('clients_enable','false')!='false')

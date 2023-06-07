@@ -1,8 +1,8 @@
 
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="card shadow border-0 mt-1">
-            <div class="card-body text-center">
+    <div class="col-12 justify-content-center">
+        <div class="border-0 mt-1">
+            <div class="text-center">
                 <div id="successPaymentAnim" class="justify-content-center text-center">
                     <img alt="cash icon" src="/custom/img/payment-successful.gif" >
                 </div>

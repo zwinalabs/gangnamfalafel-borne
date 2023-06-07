@@ -43,7 +43,9 @@
     </div>
     <div class="mb-6">
         <h6 class="mt-3 comment-title">{{ __('Comment') }}<span class="font-weight-light"></span></h6>
-        <textarea name="comment" id="cart-details-comment" class="green-border form-control" placeholder="{{ __( 'Your comment here' ) }} ..." onChange="setComments('cart-details-comment');"></textarea>
+        <textarea name="comment" id="cart-details-comment" class="green-border " placeholder="{{ __( 'Your comment here' ) }} ..." onChange="setComments('cart-details-comment');" data-role="keypad"
+        data-keys="a,z,e,r,t,y,u,i,o,p,q,s,d,f,g,h,j,k,l,w,x,c,v,b,n,m,_" style="border-color: transparent;
+        width: 100%;"></textarea>
     </div>
     <div class="text-center" v-if="itemsCount" v-cloak>
         <a href="javascript:void(0)" onClick="showCheckoutModel();"  class="btn btn-success mt-4 paymentbutton bg-gradient-red icon-shape callOutShoppingButtonBottomCheckout mb-1 go_pay_btn_bord hide-mobile-only">{{ __('Valider') }}</a>
