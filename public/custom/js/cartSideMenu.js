@@ -318,11 +318,16 @@ var clearResetAll = function(){
 }
 
 var tryAgainPayment = function(order_id=null){
+    $('#paymentDetailsBorneContent').css("pointer-events", "none");
+    $('#paymentDetailsBorneContent').css("opacity", "0.6");
     $('#paymentDetailsBorneContent #checkoutBorneLoader').show();
     axios.get('/order/success', {params: {order : order_id}})
     .then(function(response) {
         console.log(response);
         $('#paymentDetailsBorneContent #checkoutBorneLoader').hide();
+        $('#paymentDetailsBorneContent').css("pointer-events", "auto");
+        $('#paymentDetailsBorneContent').css("opacity", "1");
+
         $("#paymentDetailsBorneContent").html(response.data.html);
     }).finally(() => {
         successCallClear();
