@@ -444,6 +444,7 @@
         var TEMPLATE_USED="<?php echo config('settings.front_end_template','defaulttemplate') ?>";
         var DISPLAY_CADDY = "";
     </script>
+    <script src="{{ asset('custom') }}/js/metro.min.js"></script>
     <script src="{{ asset('custom') }}/js/order.js"></script>
     @include('restorants.phporderinterface') 
     @if (isset($showGoogleTranslate)&&$showGoogleTranslate&&!$showLanguagesSelector)
