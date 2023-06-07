@@ -1035,3 +1035,8 @@ function showCommentIcone(){
         $("#fullCommentArea").hide();
     }
 }
+
+var showLandingPageAfterPayment = function(){
+    $("#landing-page").show();
+    $("#restaurant-content").hide();
+}
