@@ -1123,22 +1123,31 @@ class OrderController extends Controller
         $eMonetiqueResult = "";
         $eMonetiqueReceipt = "";
         $bornePayment = "";
-        $errMsg = "";
+        $errMsg = __("Order payment error!");
         $error = false;
+        $receipt = __('No receipt.');
 
         try{
             //if borne payment failure
-            if ($request->has('pinpass') && env('PIN_ORDER_PASS') == $request->pinpass){
-                
-                $bornePayment = 'unpaid';
-                $order = Order::findOrFail($request->order);
-                $order->payment_method = "cod";
-                $order->payment_status = $bornePayment;
-                $order->update();
-                
-                $html = view('orders.successbornepin',
-                compact('order','errMsg','bornePayment', 'error' ))->render();
-
+            if ($request->has('rscode_pin')){
+                if($order->restorant->code_pin == $request->rscode_pin){
+                    $bornePayment = 'unpaid';
+                    $order = Order::findOrFail($request->order);
+                    $order->payment_method = "cod";
+                    $order->payment_status = $bornePayment;
+                    $order->update();
+                    $errMsg = __("Payment")." ".__("Cash");
+                    $html = view('orders.successbornepin',
+                        compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
+                    $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
+                    return response()->json($params);
+                }else{
+                    $errMsg =  __("PIN Code invalide")."!";
+                    $html = view('orders.errorborne', 
+                        compact('order','errMsg','bornePayment','error'))->render();
+                    $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
+                    return response()->json($params);
+                }
             //borne OK
             }else{
                 if($order){
@@ -1156,13 +1165,16 @@ class OrderController extends Controller
                         );
                         $jsonData = json_encode($data);
 
+
                         // E-Monetique Query 
                         // send request to emonetique payment borne via post request, tested at POST/GET/PUT
                         // Prod: http://192.168.1.200:8400/borne
                         // Test: https://gobiz.tn/borne
-                        // v.test
-                        $response = Http::timeout(8)->withHeaders($headers)->post('http://bornes.test:3000', $data);
-                        ///// v.prod
+                        
+                        ///// v.test response after 10 seconds depends of api is up/down
+                        $response = Http::timeout(10)->withHeaders($headers)->post('http://bornes.test:3000', $data);
+                        
+                        ///// v.prod response after 10 seconds depends of api is up/down
                         ///// $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
 
                         if($response->successful()){
@@ -1173,7 +1185,7 @@ class OrderController extends Controller
                                 $order->payment_status = $bornePayment;
                                 $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                                 $order->update();
-                                
+                                $errMsg = '';
                                 $receipt = nl2br($eMonetiqueReceipt, false);
                                 $html = view('orders.successborne', 
                                 compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
@@ -1183,12 +1195,11 @@ class OrderController extends Controller
                         }else{
                             $eMonetiqueResult = "eMonetique request fail";
                             $eMonetiqueReceipt = $eMonetiqueResult;
-                            $errMsg = "Error : order not found!";
                             $bornePayment = 'unpaid';
                             $error = true;
                             $html = view('orders.errorborne', 
                             compact('order','errMsg','bornePayment','error'))->render();
-                            $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
+                            $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
                             return response()->json($params);
                         }
 
@@ -1198,24 +1209,26 @@ class OrderController extends Controller
                             $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                             $order->update();
                             $receipt = nl2br($eMonetiqueReceipt, false);
+                            $errMsg = '';
                             $html = view('orders.successborne', 
                             compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
+                            $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
+                                return response()->json($params);
                         }else{
-                            $errMsg = "Error : ".$eMonetiqueResult;
                             $bornePayment = 'unpaid';
                             $error = true;
                             $html = view('orders.errorborne', 
                             compact('order','errMsg','bornePayment','error'))->render();
+                            $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
+                            return response()->json($params);
                         }
                 }
             }
-            $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
-            return response()->json($params);
 
         }catch(\Exception $e) {
             $error = "Error: ".$e->getCode()." : ".$e->getMessage();
             $html = view('orders.errorborne', compact('order','errMsg','bornePayment','error'))->render();
-            $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
+            $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
             return response()->json($params);
         }
     }
