@@ -4189,10 +4189,8 @@ h5.modal-title {
     font-size: 12px;
 }
 #successPaymentAnim img{
-    position: relative;
-    left: 38%;
-    top: 0;
     width: 120px;
+    margin: 0 auto;
 }
 .display-payment-success,
 .display-payment-error{
