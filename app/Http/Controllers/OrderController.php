@@ -27,6 +27,8 @@ use App\Events\OrderAcceptedByVendor;
 use App\Models\Orderitems;
 use App\Models\SimpleDelivery;
 use Illuminate\Support\Facades\Http;
+use App\Events\NewOrder as PusherNewOrder;
+
 
 class OrderController extends Controller
 {
@@ -1135,7 +1137,9 @@ class OrderController extends Controller
                     $order = Order::findOrFail($request->order);
                     $order->payment_method = "cod";
                     $order->payment_status = $bornePayment;
+                    $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                     $order->update();
+                    $this->notifyOwnerGanFal($order);
                     $errMsg = __("Payment")." ".__("Cash");
                     $html = view('orders.successbornepin',
                         compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
@@ -1172,10 +1176,10 @@ class OrderController extends Controller
                         // Test: https://gobiz.tn/borne
                         
                         ///// v.test response after 10 seconds depends of api is up/down
-                        ///// $response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test:3000', $data);
+                        $response = Http::timeout(10)->withHeaders($headers)->post('http://bornes.test:3000', $data);
                         
                         ///// v.prod response after 10 seconds depends of api is up/down
-                        $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
+                        ///// $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
 
                         if($response->successful()){
                             $eMonetiqueResult = $response->json()['Result'];
@@ -1186,6 +1190,7 @@ class OrderController extends Controller
                                 $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                                 $order->update();
                                 $errMsg = '';
+                                $this->notifyOwnerGanFal($order);
                                 $receipt = nl2br($eMonetiqueReceipt, false);
                                 $html = view('orders.successborne', 
                                 compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
@@ -1210,6 +1215,7 @@ class OrderController extends Controller
                             $order->update();
                             $receipt = nl2br($eMonetiqueReceipt, false);
                             $errMsg = '';
+                            $this->notifyOwnerGanFal($order);
                             $html = view('orders.successborne', 
                             compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
                             $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
@@ -1231,5 +1237,17 @@ class OrderController extends Controller
             $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
             return response()->json($params);
         }
+    }
+
+    private function notifyOwnerGanFal($order){
+        $order->restorant->user->notify((new OrderNotification($order,1,$order->restorant->user))->locale(strtolower(config('settings.app_locale'))));
+
+        //Notify owner with pusher
+        if (strlen(config('broadcasting.connections.pusher.secret')) > 4) {
+            event(new PusherNewOrder($order, __('notifications_notification_neworder')));
+        }
+
+        //Dispatch Approved by admin event
+        OrderAcceptedByAdmin::dispatch($order);
     }
 }
