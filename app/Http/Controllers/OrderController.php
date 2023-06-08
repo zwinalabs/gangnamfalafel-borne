@@ -1176,10 +1176,10 @@ class OrderController extends Controller
                         // Test: https://gobiz.tn/borne
                         
                         ///// v.test response after 10 seconds depends of api is up/down
-                        $response = Http::timeout(10)->withHeaders($headers)->post('http://bornes.test:3000', $data);
+                        ///// $response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test:3000', $data);
                         
                         ///// v.prod response after 10 seconds depends of api is up/down
-                        ///// $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
+                        $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
 
                         if($response->successful()){
                             $eMonetiqueResult = $response->json()['Result'];
