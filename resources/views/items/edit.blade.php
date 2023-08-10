@@ -66,9 +66,9 @@
                                 @elseif(auth()->user()->hasRole('admin'))
                                     <a href="{{ route('items.admin', $restorant) }}" class="btn btn-sm btn-primary">{{ __('Back to items') }}</a>
                                 @endif
-                                @if (route::has('cloner.cloneitem'))
+                                {{--@if (route::has('cloner.cloneitem'))
                                     <a href="{{route('cloner.cloneitem',$item->id ) }}" class="btn btn-sm btn-secondary">{{ __('Clone it') }}</a>
-                               @endif
+                               @endif--}}
                             </div>
                         </div>
                     </div>
@@ -90,6 +90,15 @@
                                             @if ($errors->has('item_name'))
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $errors->first('item_name') }}</strong>
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <div class="form-group{{ $errors->has('item_product_id_hiboutik') ? ' has-danger' : '' }}">
+                                            <label class="form-control-label" for="item_product_id_hiboutik">{{ __('Hiboutik product ID') }}</label>
+                                            <input type="text" name="item_product_id_hiboutik" id="item_product_id_hiboutik" class="form-control form-control-alternative{{ $errors->has('item_product_id_hiboutik') ? ' is-invalid' : '' }}" placeholder="{{ __('Hiboutik product ID') }}" value="{{ old('item_product_id_hiboutik', $item->product_id_hiboutik) }}" required autofocus>
+                                            @if ($errors->has('item_product_id_hiboutik'))
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $errors->first('item_product_id_hiboutik') }}</strong>
                                                 </span>
                                             @endif
                                         </div>
