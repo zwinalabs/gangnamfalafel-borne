@@ -349,7 +349,7 @@ class OrderController extends Controller
             //Web order
             $mobileLikeRequest=$this->toMobileLike($request);
         }
-
+        $paycash = ($request->paycash)?true:false;
         //Data
         $vendor_id =  $mobileLikeRequest->vendor_id;
         $expedition= $mobileLikeRequest->delivery_method;
@@ -386,7 +386,7 @@ class OrderController extends Controller
         $validator=$orderRepo->validateData();
         if ($validator->fails()) { 
             notify()->error($validator->errors()->first());
-            return $orderRepo->redirectOrInform();
+            return $orderRepo->redirectOrInform($paycash);
         }
 
         //Proceed with making the order
@@ -396,9 +396,9 @@ class OrderController extends Controller
         }
         if ($validatorOnMaking->fails()) { 
             notify()->error($validatorOnMaking->errors()->first()); 
-            return $orderRepo->redirectOrInform(); 
+            return $orderRepo->redirectOrInform($paycash); 
         }
-        return $orderRepo->redirectOrInform();
+        return $orderRepo->redirectOrInform($paycash);
     }
 
     public function orderLocationAPI(Order $order)
@@ -1117,7 +1117,13 @@ class OrderController extends Controller
         }
         return view('orders.success', ['order' => $order,'showWhatsApp'=>$showWhatsApp]);
     }
-
+    
+    /**
+     * success
+     *
+     * @param  mixed $request
+     * @return template balde
+     */
     public function success(Request $request)
     {
         $token = Str::random(10);
@@ -1128,10 +1134,11 @@ class OrderController extends Controller
         $errMsg = __("Order payment error!");
         $error = false;
         $receipt = __('No receipt.');
-
+        dd($request->has('order') && $request->has('paycach'));
         try{
             //if borne payment failure
-            if ($request->has('rscode_pin')){
+            if ($request->has('rscode_pin') && $request->has('order'))
+            {
                 if($order->restorant->code_pin == $request->rscode_pin){
                     $bornePayment = 'unpaid';
                     $order = Order::findOrFail($request->order);
@@ -1153,7 +1160,24 @@ class OrderController extends Controller
                     return response()->json($params);
                 }
             //borne OK
-            }else{
+            }
+            elseif($request->has('paycach') && $request->has('order'))
+            {
+                $bornePayment = 'unpaid';
+                $order = Order::findOrFail($request->order);
+                $order->payment_method = "cod";
+                $order->payment_status = $bornePayment;
+                $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
+                $order->update();
+                $this->notifyOwnerGanFal($order);
+                $errMsg = __("Payment")." ".__("Cash");
+                $html = view('orders.successbornepin',
+                    compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
+                $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
+                return response()->json($params);
+            }
+            else
+            {
                 if($order){
                     //emonetique header elements
                         $headers = [
@@ -1238,8 +1262,16 @@ class OrderController extends Controller
             return response()->json($params);
         }
     }
-
+ 
+        
+    /**
+     * notifyOwnerGanFal : Send push notification to owner, saler or waiter via backend interface
+     *
+     * @param  mixed $order
+     * @return void
+     */
     private function notifyOwnerGanFal($order){
+        
         $order->restorant->user->notify((new OrderNotification($order,1,$order->restorant->user))->locale(strtolower(config('settings.app_locale'))));
 
         //Notify owner with pusher
@@ -1249,5 +1281,117 @@ class OrderController extends Controller
 
         //Dispatch Approved by admin event
         OrderAcceptedByAdmin::dispatch($order);
+    }
+        
+    /**
+     * newSale_hiboutik: create new sale at hiboutik
+     *
+     * @param  mixed $printing_geteway
+     * @param  mixed $store_id
+     * @return sale_id
+     */
+    private function newSale_hiboutik($printing_geteway, $store_id){
+
+        $response = Http::get($printing_geteway.'/new-sale.php', [
+            'store_id' => $store_id,
+            'currency_code' => "EUR",
+        ]);
+        if($response->successful()){
+            return $response->json()['sale_id'];
+        }else{
+            return "error create new hiboutik sale";
+        }
+    }
+        
+    /**
+     * closeSale_hiboutik
+     *
+     * @param  mixed $printing_geteway
+     * @param  mixed $sale_id
+     * @return string
+     */
+    private function closeSale_hiboutik($printing_geteway, $sale_id){
+        $response = Http::get($printing_geteway.'/close-sale.php', [
+            'sale_id' => $sale_id,
+        ]);
+        if($response->successful()){
+            return $response->json()['sale_id'];
+        }else{
+            return "error create new hiboutik sale";
+        }
+    }
+    
+    /**
+     * addProductToSale_hiboutik
+     *
+     * @param  mixed $printing_geteway
+     * @param  mixed $sale_id
+     * @param  mixed $product_id
+     * @param  mixed $quantity
+     * @param  mixed $product_id_hiboutik
+     * @return id_sale_product_detail
+     */
+    private function addProductToSale_hiboutik($printing_geteway, $sale_id, $product_id, $quantity, $product_id_hiboutik){
+        if(!empty($product_id_hiboutik)){
+            $response = Http::get($printing_geteway.'/add-product.php', [
+                'sale_id' => $sale_id,
+                'product_id' => $product_id,
+                'quantity' => $quantity,
+                'stock_withdrawal' => 1
+            ]);
+            
+            if($response->successful()){
+                return $response->json()['id_sale_product_detail'];
+            }else{
+                return "error create new hiboutik sale";
+            }
+        }else{
+            return "product doesn't exist at hiboutik menu";
+        }
+    }
+        
+    /**
+     * printReceipt
+     *
+     * @param  mixed $printing_geteway
+     * @param  mixed $sale_id
+     * @return string
+     */
+    private function printReceipt($printing_geteway, $sale_id){
+        $response = Http::get($printing_geteway.'/print-kitchen.php', [
+            'sale_id' => $sale_id
+        ]);
+        if($response->successful()){
+            return $response->json()['sale_id'];
+        }else{
+            return "error create new hiboutik sale";
+        }
+    }
+        
+    /**
+     * savePrintOrder_hiboutik
+     *
+     * @param  mixed $order
+     * @return string
+     */
+    private function savePrintOrder_hiboutik($order){
+        $printing_geteway = env('PRINTING_GETEWAY','http://hiboutik.test');
+        $store_id == env('HIBOUTIK_STORE_ID', 1); //add this to .env file or DataBase
+        $result = $this->newSale_hiboutik($printing_geteway, $store_id);
+        
+        if (array_key_exists("sale_id",$result))
+        {
+            foreach ($order->items()->get() as $key => $item) {
+                if(!empty($item->product_id_hiboutik)){
+                    $this->addProductToSale_hiboutik($printing_geteway, $sale_id, $item->pivot->item_id,$item->pivot->qty, $item->product_id_hiboutik);
+                }
+            }
+            //we start printing receipt
+            $this->printReceipt($printing_geteway, $sale_id);
+            //we close the sale using sale_id
+            $this->closeSale_hiboutik($printing_geteway, $sale_id);
+        }else{
+            echo "'sale_id' Key does not exist!";
+        }
     }
 }
