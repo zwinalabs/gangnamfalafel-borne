@@ -4300,3 +4300,9 @@ h5.modal-title {
     background:#03643b;
     border-radius: 50%;
 }
+.comment-field{
+    border: 1px solid #03643b;
+    border-radius: 5px;
+    width: 100%;
+    padding: 5px;
+}
