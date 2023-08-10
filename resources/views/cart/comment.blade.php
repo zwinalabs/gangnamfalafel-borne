@@ -7,9 +7,7 @@
       <div class="card-content border-top">
         <br />
         <div class="form-group{{ $errors->has('comment') ? ' has-danger' : '' }}">
-            <textarea name="comment" id="comment" class="green-border form-control{{ $errors->has('comment') ? ' is-invalid' : '' }}" placeholder="{{ __( 'Your comment here' ) }} ..." onChange="setComments('comment');" data-role="keypad"
-              data-keys="a,z,e,r,t,y,u,i,o,p,q,s,d,f,g,h,j,k,l,w,x,c,v,b,n,m,_" style="border-color: transparent;
-              width: 100%;"></textarea>
+            <textarea name="comment" id="comment" class="green-border comment-field form-control{{ $errors->has('comment') ? ' is-invalid' : '' }}" placeholder="{{ __( 'Your comment here' ) }} ..." onChange="setComments('comment');" ></textarea>
             @if ($errors->has('comment'))
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $errors->first('comment') }}</strong>

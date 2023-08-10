@@ -78,7 +78,7 @@
                             </div>
                             <div class="card-content border-top">
                                 <div class="form-group">
-                                    <input type="text" name="rscode_pin" id="rscode_pin" class="green-border form-control" data-role="keypad" placeholder="PIN">
+                                    <input type="text" name="rscode_pin" id="rscode_pin" class="green-border form-control" placeholder="PIN">
                                 </div>
                             </div>
                             <div class="row col-12">
