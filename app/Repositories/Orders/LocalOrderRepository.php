@@ -83,13 +83,13 @@ class LocalOrderRepository extends BaseOrderRepository implements OrderTypeInter
         
     }
 
-    public function redirectOrInform(){
+    public function redirectOrInform($paycach=false){
         if($this->status){
             if($this->paymentRedirect==null){
                 //We don't have payment redirects
                 if($this->isNewOrder){
                     //New order - redirect to success page
-                    $data = ['order' => $this->order];
+                    $data = ['order' => $this->order, 'paycach' => $paycach];
                     //if isBorne
                         $this->updateOrderBorne("BORNE");
                         return redirect()->route('order.success', $data)->withCookie(cookie('orders', $this->listOfOrders, 360));
