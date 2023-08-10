@@ -219,6 +219,7 @@ function storeOrder(){
     
 
 }
+
 function checkBorneTerminal(){
 
 }
@@ -345,4 +346,30 @@ var codePinCODPayment = function(order_id=null){
     }).finally(() => {
         successCallClear();
     });
+}
+
+var storeOrderCash = function(){
+    let time_out = { timeout: 15000 }; // millisecods
+    let succeededResponse = null;
+    let data = {
+        "_token": $('meta[name="csrf-token"]').attr('content'),
+        table_id:$('#table_id').val(),
+        client_name:$('#client_name').val(),
+        paymentType:$('#paymentType').val(),
+        phone:$('#client_phone').val(),
+        comment: $('#comment').val(),
+        timeslot:$('#timeslot').val(),
+        paycash:true
+    };
+    
+    axios.post('/order', data )
+    .then(function(response) {
+        console.log(response);
+        $("#paymentDetailsBorneContent").html(response.data.html);
+        hideCheckoutModel();
+        showPaymentDetailsBorneModel();
+    }).finally(() => {
+        successCallClear();
+    });
+
 }
