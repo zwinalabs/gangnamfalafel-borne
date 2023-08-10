@@ -137,6 +137,7 @@ class ItemsController extends Controller
         $item->description = strip_tags($request->item_description);
         $item->price = strip_tags($request->item_price);
         $item->category_id = strip_tags($request->category_id);
+        $item->product_id_hiboutik = strip_tags($request->item_product_id_hiboutik);
         $defVat=0;
         $resto=$this->getRestaurant();
         if($resto){
@@ -225,6 +226,7 @@ class ItemsController extends Controller
         $item->name = strip_tags($request->item_name);
         $item->description = strip_tags($request->item_description);
         $item->category_id = $request->category_id;
+        $item->product_id_hiboutik = strip_tags($request->item_product_id_hiboutik);
         if($item->price!=strip_tags($request->item_price)){
             $makeVariantsRecreate=true;
         }
