@@ -76,7 +76,6 @@ class LocalOrderRepository extends BaseOrderRepository implements OrderTypeInter
         if($this->isNewOrder){
             //Set the just created status
             $this->order->status()->attach(14, ['user_id'=>$this->vendor->user->id, 'comment'=>'Local order']);
-
             //Set automatically approved by admin - since it it qr
         }
         
