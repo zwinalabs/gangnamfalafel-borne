@@ -456,7 +456,7 @@
                 v-if="totalPrice"
                 type="button"
                 class="btn btn-success mt-4 paymentbutton bg-gradient-red icon-shape callOutShoppingButtonBottomCheckout mb-1 go_pay_btn_bord"
-                onclick=";"
+                onclick="clearResetAll();"
             >{{ __('Cancel') }}</button>
         </div>
 
