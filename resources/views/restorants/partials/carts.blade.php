@@ -108,7 +108,7 @@
     </div>
 </div>
 
-<div id="checkoutSuccessBorneModal" >
+<div id="checkoutSuccessBorneModal"  style="display: none">
     <!-- Modal content -->
     <div class="modal-content">
         <div class="modal-header">
