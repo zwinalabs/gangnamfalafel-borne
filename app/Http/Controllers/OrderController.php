@@ -388,7 +388,7 @@ class OrderController extends Controller
             notify()->error($validator->errors()->first());
             return $orderRepo->redirectOrInform($paycash);
         }
-
+        
         //Proceed with making the order
         $validatorOnMaking=$orderRepo->makeOrder();
         if($isBorne){
@@ -1134,18 +1134,20 @@ class OrderController extends Controller
         $errMsg = __("Order payment error!");
         $error = false;
         $receipt = __('No receipt.');
-        dd($request->has('order') && $request->has('paycach'));
+
         try{
-            //if borne payment failure
-            if ($request->has('rscode_pin') && $request->has('order'))
+            //if borne payment failure use codepin to resolve the issue
+            if ($request->has('rscode_pin'))
             {
                 if($order->restorant->code_pin == $request->rscode_pin){
                     $bornePayment = 'unpaid';
-                    $order = Order::findOrFail($request->order);
                     $order->payment_method = "cod";
                     $order->payment_status = $bornePayment;
                     $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                     $order->update();
+                    //add new hiboutik sale and print all receipts
+                    $this->savePrintOrder_hiboutik($order);
+                    //notify dashboard user
                     $this->notifyOwnerGanFal($order);
                     $errMsg = __("Payment")." ".__("Cash");
                     $html = view('orders.successbornepin',
@@ -1159,16 +1161,19 @@ class OrderController extends Controller
                     $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
                     return response()->json($params);
                 }
-            //borne OK
             }
-            elseif($request->has('paycach') && $request->has('order'))
+
+            //Paycash payment methode
+            if($request->has('paycach') && !empty($request->paycach))
             {
                 $bornePayment = 'unpaid';
-                $order = Order::findOrFail($request->order);
                 $order->payment_method = "cod";
                 $order->payment_status = $bornePayment;
                 $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                 $order->update();
+                //add new hiboutik sale and print all receipts
+                $this->savePrintOrder_hiboutik($order);
+                //notify dashboard user
                 $this->notifyOwnerGanFal($order);
                 $errMsg = __("Payment")." ".__("Cash");
                 $html = view('orders.successbornepin',
@@ -1176,85 +1181,90 @@ class OrderController extends Controller
                 $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
                 return response()->json($params);
             }
-            else
-            {
-                if($order){
-                    //emonetique header elements
-                        $headers = [
-                            "Content-type" => "application/json",
-                            "Accept" =>  "application/json",
-                            // "Cache-control" =>  "no-cache",
-                            //"ganfal-token" =>  $token
-                        ];
-                        //emonetique data
-                        $data = array(
-                            'amount' => strval($order->order_price*100),
-                            'transactionId' => strval($order->id)
-                        );
-                        $jsonData = json_encode($data);
+
+            //Borne emonetique payment not paycash or codepin 
+            if($order){
+                //emonetique header elements
+                $headers = [
+                    "Content-type" => "application/json",
+                    "Accept" =>  "application/json",
+                    // "Cache-control" =>  "no-cache",
+                    //"ganfal-token" =>  $token
+                ];
+                //emonetique data
+                $data = array(
+                    'amount' => strval($order->order_price*100),
+                    'transactionId' => strval($order->id)
+                );
+                $jsonData = json_encode($data);
 
 
-                        // E-Monetique Query 
-                        // send request to emonetique payment borne via post request, tested at POST/GET/PUT
-                        // Prod: http://192.168.1.200:8400/borne
-                        // Test: https://gobiz.tn/borne
-                        
-                        ///// v.test response after 10 seconds depends of api is up/down
-                        ///// $response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test:3000', $data);
-                        
-                        ///// v.prod response after 10 seconds depends of api is up/down
-                        $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
+                // E-Monetique Query 
+                // send request to emonetique payment borne via post request, tested at POST/GET/PUT
+                // Prod: http://192.168.1.200:8400/borne
+                // Test: https://gobiz.tn/borne
+                
+                ///// v.test response after 10 seconds depends of api is up/down
+                $response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test', $data);
+                
+                ///// v.prod response after 10 seconds depends of api is up/down
+                //$response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
+                
+                if($response->successful()){
+                    $eMonetiqueResult = $response->json()['Result'];
+                    $eMonetiqueReceipt = $response->json()['Receipt'];
+                    if($eMonetiqueResult == "OK"){
+                        $bornePayment = 'paid';
+                        $order->payment_status = $bornePayment;
+                        $order->payment_method = "BORNE";
+                        $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
+                        $order->update();
+                        $errMsg = '';
+                        //add new hiboutik sale and print all receipts
+                        $this->savePrintOrder_hiboutik($order);
+                        //notify dashboard user
+                        $this->notifyOwnerGanFal($order);
+                        $receipt = nl2br($eMonetiqueReceipt, false);
+                        $html = view('orders.successborne', 
+                        compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
+                        $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
+                        return response()->json($params);
+                    }
+                }else{
+                    $eMonetiqueResult = "eMonetique request fail";
+                    $eMonetiqueReceipt = $eMonetiqueResult;
+                    $bornePayment = 'unpaid';
+                    $error = true;
+                    $html = view('orders.errorborne', 
+                    compact('order','errMsg','bornePayment','error'))->render();
+                    $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
+                    return response()->json($params);
+                }
 
-                        if($response->successful()){
-                            $eMonetiqueResult = $response->json()['Result'];
-                            $eMonetiqueReceipt = $response->json()['Receipt'];
-                            if($eMonetiqueResult == "OK"){
-                                $bornePayment = 'paid';
-                                $order->payment_status = $bornePayment;
-                                $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
-                                $order->update();
-                                $errMsg = '';
-                                $this->notifyOwnerGanFal($order);
-                                $receipt = nl2br($eMonetiqueReceipt, false);
-                                $html = view('orders.successborne', 
-                                compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
-                                $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
-                                return response()->json($params);
-                            }
-                        }else{
-                            $eMonetiqueResult = "eMonetique request fail";
-                            $eMonetiqueReceipt = $eMonetiqueResult;
-                            $bornePayment = 'unpaid';
-                            $error = true;
-                            $html = view('orders.errorborne', 
-                            compact('order','errMsg','bornePayment','error'))->render();
-                            $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
-                            return response()->json($params);
-                        }
-
-                        if($eMonetiqueResult == "OK"){
-                            $bornePayment = 'paid';
-                            $order->payment_status = $bornePayment;
-                            $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
-                            $order->update();
-                            $receipt = nl2br($eMonetiqueReceipt, false);
-                            $errMsg = '';
-                            $this->notifyOwnerGanFal($order);
-                            $html = view('orders.successborne', 
-                            compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
-                            $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
-                                return response()->json($params);
-                        }else{
-                            $bornePayment = 'unpaid';
-                            $error = true;
-                            $html = view('orders.errorborne', 
-                            compact('order','errMsg','bornePayment','error'))->render();
-                            $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
-                            return response()->json($params);
-                        }
+                if($eMonetiqueResult == "OK"){
+                    $bornePayment = 'paid';
+                    $order->payment_status = $bornePayment;
+                    $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
+                    $order->update();
+                    $receipt = nl2br($eMonetiqueReceipt, false);
+                    $errMsg = '';
+                    //add new hiboutik sale and print all receipts
+                    $this->savePrintOrder_hiboutik($order);
+                    //notify dashboard user
+                    $this->notifyOwnerGanFal($order);
+                    $html = view('orders.successborne', 
+                    compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
+                    $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
+                        return response()->json($params);
+                }else{
+                    $bornePayment = 'unpaid';
+                    $error = true;
+                    $html = view('orders.errorborne', 
+                    compact('order','errMsg','bornePayment','error'))->render();
+                    $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
+                    return response()->json($params);
                 }
             }
-
         }catch(\Exception $e) {
             $error = "Error: ".$e->getCode()." : ".$e->getMessage();
             $html = view('orders.errorborne', compact('order','errMsg','bornePayment','error'))->render();
@@ -1263,7 +1273,7 @@ class OrderController extends Controller
         }
     }
  
-        
+
     /**
      * notifyOwnerGanFal : Send push notification to owner, saler or waiter via backend interface
      *
@@ -1271,7 +1281,7 @@ class OrderController extends Controller
      * @return void
      */
     private function notifyOwnerGanFal($order){
-        
+        //notfiy
         $order->restorant->user->notify((new OrderNotification($order,1,$order->restorant->user))->locale(strtolower(config('settings.app_locale'))));
 
         //Notify owner with pusher
@@ -1358,6 +1368,25 @@ class OrderController extends Controller
      * @return string
      */
     private function printReceipt($printing_geteway, $sale_id){
+        $response = Http::get($printing_geteway.'/print-receipt.php', [
+            'sale_id' => $sale_id
+        ]);
+        if($response->successful()){
+            return $response->json()['sale_id'];
+        }else{
+            return "error create new hiboutik sale";
+        }
+    }
+
+    
+    /**
+     * printReceiptKitchen
+     *
+     * @param  mixed $printing_geteway
+     * @param  mixed $sale_id
+     * @return void
+     */
+    private function printReceiptKitchen($printing_geteway, $sale_id){
         $response = Http::get($printing_geteway.'/print-kitchen.php', [
             'sale_id' => $sale_id
         ]);
@@ -1388,6 +1417,7 @@ class OrderController extends Controller
             }
             //we start printing receipt
             $this->printReceipt($printing_geteway, $sale_id);
+            $this->printReceiptKitchen($printing_geteway, $sale_id);
             //we close the sale using sale_id
             $this->closeSale_hiboutik($printing_geteway, $sale_id);
         }else{
