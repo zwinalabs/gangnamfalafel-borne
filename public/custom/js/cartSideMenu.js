@@ -313,8 +313,11 @@ var clearResetAll = function(){
     $("#checkoutSuccessBorneModal").hide();
     $("#checkoutDetailsBorneModal").hide();
     hideCheckoutDetailsModel();
+    hideCheckoutSuccessModel();
     hideCheckoutModel();
     successCallClear();
+    $("#landing-page").show();
+    $("#restaurant-content").hide();
     setTimeout(() => { successCallClear(); }, "1000");
 }
 
