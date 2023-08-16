@@ -1146,7 +1146,7 @@ class OrderController extends Controller
                     $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                     $order->update();
                     //add new hiboutik sale and print all receipts
-                    $this->savePrintOrder_hiboutik($order);
+                    /////$this->savePrintOrder_hiboutik($order);
                     //notify dashboard user
                     $this->notifyOwnerGanFal($order);
                     $errMsg = __("Payment")." ".__("Cash");
@@ -1172,7 +1172,7 @@ class OrderController extends Controller
                 $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                 $order->update();
                 //add new hiboutik sale and print all receipts
-                $this->savePrintOrder_hiboutik($order);
+                /////$this->savePrintOrder_hiboutik($order);
                 //notify dashboard user
                 $this->notifyOwnerGanFal($order);
                 $errMsg = __("Payment")." ".__("Cash");
@@ -1205,10 +1205,10 @@ class OrderController extends Controller
                 // Test: https://gobiz.tn/borne
                 
                 ///// v.test response after 10 seconds depends of api is up/down
-                //$response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test', $data);
+                $response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test', $data);
                 
                 ///// v.prod response after 10 seconds depends of api is up/down
-                $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
+                //$response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
                 
                 if($response->successful()){
                     $eMonetiqueResult = $response->json()['Result'];
@@ -1221,7 +1221,7 @@ class OrderController extends Controller
                         $order->update();
                         $errMsg = '';
                         //add new hiboutik sale and print all receipts
-                        $this->savePrintOrder_hiboutik($order);
+                        /////$this->savePrintOrder_hiboutik($order);
                         //notify dashboard user
                         $this->notifyOwnerGanFal($order);
                         $receipt = nl2br($eMonetiqueReceipt, false);
@@ -1249,7 +1249,7 @@ class OrderController extends Controller
                     $receipt = nl2br($eMonetiqueReceipt, false);
                     $errMsg = '';
                     //add new hiboutik sale and print all receipts
-                    $this->savePrintOrder_hiboutik($order);
+                    /////$this->savePrintOrder_hiboutik($order);
                     //notify dashboard user
                     $this->notifyOwnerGanFal($order);
                     $html = view('orders.successborne', 
