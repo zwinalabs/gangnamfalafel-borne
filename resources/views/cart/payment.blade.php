@@ -451,13 +451,13 @@
         </div>
 
         <div class="text-center">
-            <button
+            {{--<button
                 id="go_payement_btn"
                 v-if="totalPrice"
                 type="button"
                 class="btn btn-success mt-4 paymentbutton bg-gradient-red icon-shape callOutShoppingButtonBottomCheckout mb-1 go_pay_btn_bord"
                 onclick="clearResetAll();"
-            >{{ __('Cancel') }}</button>
+            >{{ __('Cancel') }}</button> --}}
         </div>
 
       </div>
