@@ -349,7 +349,9 @@ class OrderController extends Controller
             //Web order
             $mobileLikeRequest=$this->toMobileLike($request);
         }
-        $paycash = ($request->paycash)?true:false;
+        //hiboutk_data
+        $dataHiboutik =  array("paycash"  => ($request->paycash)??false, "hiboutik_sale_id" => ($request->hiboutik_sale_id)??0) ;
+
         //Data
         $vendor_id =  $mobileLikeRequest->vendor_id;
         $expedition= $mobileLikeRequest->delivery_method;
@@ -386,7 +388,7 @@ class OrderController extends Controller
         $validator=$orderRepo->validateData();
         if ($validator->fails()) { 
             notify()->error($validator->errors()->first());
-            return $orderRepo->redirectOrInform($paycash);
+            return $orderRepo->redirectOrInform($dataHiboutik);
         }
         
         //Proceed with making the order
@@ -396,9 +398,9 @@ class OrderController extends Controller
         }
         if ($validatorOnMaking->fails()) { 
             notify()->error($validatorOnMaking->errors()->first()); 
-            return $orderRepo->redirectOrInform($paycash); 
+            return $orderRepo->redirectOrInform($dataHiboutik); 
         }
-        return $orderRepo->redirectOrInform($paycash);
+        return $orderRepo->redirectOrInform($dataHiboutik);
     }
 
     public function orderLocationAPI(Order $order)
@@ -1134,7 +1136,8 @@ class OrderController extends Controller
         $errMsg = __("Order payment error!");
         $error = false;
         $receipt = __('No receipt.');
-
+        //add order items to Hiboutik
+        $orderToPrint = $this->addProductToSale($order);
         try{
             //if borne payment failure use codepin to resolve the issue
             if ($request->has('rscode_pin'))
@@ -1146,7 +1149,7 @@ class OrderController extends Controller
                     $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                     $order->update();
                     //add new hiboutik sale and print all receipts
-                    /////$this->savePrintOrder_hiboutik($order);
+                    $this->savePrintOrder_hiboutik($orderToPrint);
                     //notify dashboard user
                     $this->notifyOwnerGanFal($order);
                     $errMsg = __("Payment")." ".__("Cash");
@@ -1172,7 +1175,7 @@ class OrderController extends Controller
                 $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                 $order->update();
                 //add new hiboutik sale and print all receipts
-                /////$this->savePrintOrder_hiboutik($order);
+                $this->savePrintOrder_hiboutik($orderToPrint);
                 //notify dashboard user
                 $this->notifyOwnerGanFal($order);
                 $errMsg = __("Payment")." ".__("Cash");
@@ -1208,6 +1211,7 @@ class OrderController extends Controller
                 //$response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test', $data);
                 
                 ///// v.prod response after 10 seconds depends of api is up/down
+
                 $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
                 
                 if($response->successful()){
@@ -1221,7 +1225,7 @@ class OrderController extends Controller
                         $order->update();
                         $errMsg = '';
                         //add new hiboutik sale and print all receipts
-                        /////$this->savePrintOrder_hiboutik($order);
+                        $this->savePrintOrder_hiboutik($orderToPrint);
                         //notify dashboard user
                         $this->notifyOwnerGanFal($order);
                         $receipt = nl2br($eMonetiqueReceipt, false);
@@ -1241,7 +1245,7 @@ class OrderController extends Controller
                     return response()->json($params);
                 }
 
-                if($eMonetiqueResult == "OK"){
+                /*if($eMonetiqueResult == "OK"){
                     $bornePayment = 'paid';
                     $order->payment_status = $bornePayment;
                     $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
@@ -1263,7 +1267,7 @@ class OrderController extends Controller
                     compact('order','errMsg','bornePayment','error'))->render();
                     $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
                     return response()->json($params);
-                }
+                }*/
             }
         }catch(\Exception $e) {
             $error = "Error: ".$e->getCode()." : ".$e->getMessage();
@@ -1281,7 +1285,7 @@ class OrderController extends Controller
      * @return void
      */
     private function notifyOwnerGanFal($order){
-        //notfiy
+        //notfiy 
         $order->restorant->user->notify((new OrderNotification($order,1,$order->restorant->user))->locale(strtolower(config('settings.app_locale'))));
 
         //Notify owner with pusher
@@ -1293,135 +1297,62 @@ class OrderController extends Controller
         OrderAcceptedByAdmin::dispatch($order);
     }
         
-    /**
-     * newSale_hiboutik: create new sale at hiboutik
-     *
-     * @param  mixed $printing_geteway
-     * @param  mixed $store_id
-     * @return sale_id
-     */
-    private function newSale_hiboutik($printing_geteway, $store_id){
-
-        $response = Http::get($printing_geteway.'/new-sale.php', [
-            'store_id' => $store_id,
-            'currency_code' => "EUR",
-        ]);
-        if($response->successful()){
-            return $response->json()['sale_id'];
-        }else{
-            return "error create new hiboutik sale";
-        }
-    }
-        
-    /**
-     * closeSale_hiboutik
-     *
-     * @param  mixed $printing_geteway
-     * @param  mixed $sale_id
-     * @return string
-     */
-    private function closeSale_hiboutik($printing_geteway, $sale_id){
-        $response = Http::get($printing_geteway.'/close-sale.php', [
-            'sale_id' => $sale_id,
-        ]);
-        if($response->successful()){
-            return $response->json()['sale_id'];
-        }else{
-            return "error create new hiboutik sale";
-        }
-    }
-    
-    /**
-     * addProductToSale_hiboutik
-     *
-     * @param  mixed $printing_geteway
-     * @param  mixed $sale_id
-     * @param  mixed $product_id
-     * @param  mixed $quantity
-     * @param  mixed $product_id_hiboutik
-     * @return id_sale_product_detail
-     */
-    private function addProductToSale_hiboutik($printing_geteway, $sale_id, $product_id, $quantity, $product_id_hiboutik){
-        if(!empty($product_id_hiboutik)){
-            $response = Http::get($printing_geteway.'/add-product.php', [
-                'sale_id' => $sale_id,
-                'product_id' => $product_id,
-                'quantity' => $quantity,
-                'stock_withdrawal' => 1
-            ]);
-            
-            if($response->successful()){
-                return $response->json()['id_sale_product_detail'];
-            }else{
-                return "error create new hiboutik sale";
+    private function addProductToSale($order){
+        $printing_gateway = env('PRINTING_GATEWAY','http://hiboutik.test');
+        $hiboutik_tax_val = Http::get($printing_gateway.'/gettaxes.php');
+        $hiboutik_tax_val = floatval($hiboutik_tax_val);
+        $orderToPrint['sale_id'] = $order->sale_id_hiboutik;
+        foreach ($order->items()->get() as $key => $item) {
+            //add line items to order to print
+            $orderToPrint['line_items'][] = array(
+                'quantity'=>$item->pivot->qty, 
+                'product_model' =>$item->name , 
+                'item_unit_gross' => $item->pivot->variant_price ?? $item->price, 
+                'product_currency' => env('CASHIER_CURRENCY', 'EUR')
+            );
+            if(!empty($item->product_id_hiboutik)){
+                $promise = Http::async()->get("/api/add-product-sale-hiboutik", [
+                    'sale_id' => $order->sale_id_hiboutik,
+                    'product_id_hiboutik' => $item->product_id_hiboutik,
+                    'quantity' => $item->pivot->qty
+                ])->then(function ($response) {
+                    if($response->successful()){
+                        $addArray[$order->id][$product_id_hiboutik] = "ok";
+                    }else{
+                        $addArray[$order->id][$product_id_hiboutik] = "ko";
+                    }
+                });
             }
-        }else{
-            return "product doesn't exist at hiboutik menu";
         }
-    }
-        
-    /**
-     * printReceipt
-     *
-     * @param  mixed $printing_geteway
-     * @param  mixed $sale_id
-     * @return string
-     */
-    private function printReceipt($printing_geteway, $sale_id){
-        $response = Http::get($printing_geteway.'/print-receipt.php', [
-            'sale_id' => $sale_id
-        ]);
-        if($response->successful()){
-            return $response->json()['sale_id'];
-        }else{
-            return "error create new hiboutik sale";
-        }
+        //define taxes
+        $order_price = $order->order_price;
+        $tax_value = number_format($hiboutik_tax_val,2);
+        $tax_value_p = ($tax_value*100)."%";
+        $total_vat = number_format($order_price*$tax_value, 2);
+        $total_net = number_format($order_price - $total_vat, 2);
+        $orderToPrint["taxes"] = [
+            "tax_value" => $taxVal,
+            "tax_value_p"=>  $tax_value_p,
+            "total_net"=>  $total_net,
+            "total_vat"=> $total_vat  ,
+            "total_gross"=>  number_format($total_net+$total_vat, 2)
+        ];
+        $orderToPrint['created_at'] = $order->created_at;
+        return $orderToPrint;
     }
 
-    
-    /**
-     * printReceiptKitchen
-     *
-     * @param  mixed $printing_geteway
-     * @param  mixed $sale_id
-     * @return void
-     */
-    private function printReceiptKitchen($printing_geteway, $sale_id){
-        $response = Http::get($printing_geteway.'/print-kitchen.php', [
-            'sale_id' => $sale_id
-        ]);
-        if($response->successful()){
-            return $response->json()['sale_id'];
-        }else{
-            return "error create new hiboutik sale";
-        }
-    }
-        
-    /**
-     * savePrintOrder_hiboutik
-     *
-     * @param  mixed $order
-     * @return string
-     */
     private function savePrintOrder_hiboutik($order){
-        $printing_geteway = env('PRINTING_GETEWAY','http://hiboutik.test');
-        $store_id == env('HIBOUTIK_STORE_ID', 1); //add this to .env file or DataBase
-        $result = $this->newSale_hiboutik($printing_geteway, $store_id);
-        
-        if (array_key_exists("sale_id",$result))
-        {
-            foreach ($order->items()->get() as $key => $item) {
-                if(!empty($item->product_id_hiboutik)){
-                    $this->addProductToSale_hiboutik($printing_geteway, $sale_id, $item->pivot->item_id,$item->pivot->qty, $item->product_id_hiboutik);
+        if(count($order) > 0){
+            $promise = Http::get("/api/add-product-sale-hiboutik", [
+                'order' => $order
+            ])->then(function ($response) {
+                if($response->successful()){
+                    $addArray[$order->id][$product_id_hiboutik] = "ok";
+                }else{
+                    $addArray[$order->id][$product_id_hiboutik] = "ko";
                 }
-            }
-            //we start printing receipt
-            $this->printReceipt($printing_geteway, $sale_id);
-            $this->printReceiptKitchen($printing_geteway, $sale_id);
-            //we close the sale using sale_id
-            $this->closeSale_hiboutik($printing_geteway, $sale_id);
-        }else{
-            echo "'sale_id' Key does not exist!";
+            });
+            
         }
     }
 }
