@@ -54,4 +54,8 @@ UPDATE `items` SET `price`=4.5, `product_id_hiboutik`=118 WHERE  `id`=367;
 UPDATE `items` SET `price`=3, `product_id_hiboutik`=131 WHERE  `id`=371;
 UPDATE `items` SET `price`=4.5, `product_id_hiboutik`=131 WHERE  `id`=372;
 
-
+--
+-- 
+-- 23-08-2023
+ALTER TABLE `orders`
+	ADD COLUMN `sale_id_hiboutik` BIGINT NULL DEFAULT NULL AFTER `kds_finished`;
