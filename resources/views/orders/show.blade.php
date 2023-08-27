@@ -10,14 +10,17 @@
                 <div class="card bg-secondary shadow">
                     <div class="card-header bg-white border-0">
                         <div class="row align-items-center">
-                            <div class="col-8">
-                                <h3 class="mb-0">{{ "#".$order->id." - ".$order->created_at->locale(Config::get('app.locale'))->isoFormat('LLLL') }}</h3>
-                            </div>
-                            <div class="col-4 text-right">
+                            <div class="col-12 text-right mb-3">
                                 <a href="{{ route('orders.index') }}" class="btn btn-sm btn-primary"><i class="fas fa-chevron-left"></i> {{ __('Back') }}</a>
                                 @if ($pdFInvoice)
                                 <a target="_blank" href="/pdfinvoice/{{$order->id}}" class="btn btn-sm btn-success"><i class="fas fa-print"></i> {{ __('Print bill') }}</a>
                                 @endif
+                            </div>
+                            <div class="col-6">
+                                <h3 class="mb-0">{{ "#".$order->id." - ".$order->created_at->locale(Config::get('app.locale'))->isoFormat('LLLL') }}</h3>
+                            </div>
+                            <div class="col-6 text-right">
+                                 <h3 class="badge badge-success badge-pill small" style="color:#03643b">{{ __("Hiboutik sale").": #".$order->sale_id_hiboutik}}</h3>
                             </div>
                         </div>
                     </div>

@@ -4,11 +4,11 @@
         <div class="border-0 mt-1">
             <div class="text-center">
                 <div id="successPaymentAnim" class="justify-content-center text-center">
-                    <img alt="cash icon" src="/custom/img/payment-successful.gif" >
+                    <img alt="cash icon successborne"src="/custom/img/payment-successful.gif" >
                 </div>
                 <h2 class="display-2 display-payment-success">{{ __("You're all set!") }}</h2>
                 <h1 class="mb-4">
-                    <span class="badge badge-primary">{{ __('Order')." #".$order->id }}</span>
+                    <span class="badge badge-primary">{{ __('Order')." #".($order->sale_id_hiboutik)??$order->id }}</span>
                 </h1>
                 <div class="d-flex justify-content-center">
                     <div class="col-8">

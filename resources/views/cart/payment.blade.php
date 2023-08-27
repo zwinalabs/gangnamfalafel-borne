@@ -420,7 +420,8 @@
             </div>
         </div>
 
-
+        <input type="hidden" name="hiboutik_sale_id" id="hiboutik_sale_id" value="">
+        
         <div class="text-center">
             <button
                 id="go_payement_btn"
