@@ -84,7 +84,7 @@ class HiboutikController extends Controller
         $response = Http::get($printing_gateway.'/new-sale.php', [
             'store_id' => ($request->store_id ?? env('HIBOUTIK_STORE_ID', 1)),
             'currency_code' => ($request->currency_code ?? env('CASHIER_CURRENCY','EUR')),
-            'vendor_id' => ($request->vendor_id ?? env('HIBOUTIK_API_VENDOR_ID', 1))
+            'vendor_id' => ($request->vendor_id ?? env('HIBOUTIK_API_VENDOR_ID', 3))
         ]);
         if($response->successful()){
             return $response->json();
@@ -197,7 +197,7 @@ class HiboutikController extends Controller
         if ($order && !empty($order["sale_id"]))
         {
             //we start printing receipt
-            $promise = Http::async()->get("/api/print-receipt-hiboutik", [
+            $promise = Http::async()->get(route("hiboutik.printReceipt"), [
                 'order' => $order
             ])->then(function ($response) {
                 if($response->successful()){
@@ -207,7 +207,7 @@ class HiboutikController extends Controller
                 }
             });
              //we start printing receipt kitchen
-             $promise = Http::async()->get("/api/print-receipt-kitchen-hiboutik", [
+             $promise = Http::async()->get(route("hiboutik.printReceiptKitchen"), [
                 'order' => $order
             ])->then(function ($response) {
                 if($response->successful()){
@@ -217,7 +217,7 @@ class HiboutikController extends Controller
                 }
             });
             //we close the sale using sale_id
-            $response = Http::get('/api/close-sale-hiboutik', [
+            $response = Http::get(route("hiboutik.closeSale"), [
                 'sale_id' => $order["sale_id"],
             ]);
             if($response->successful()){
