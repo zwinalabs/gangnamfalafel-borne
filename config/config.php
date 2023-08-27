@@ -56,12 +56,12 @@ return [
 
                 ['title'=>'Driver percent from the order', 'help'=>'From 0-100. Based on your business type, this value determines how much driver will make from the delivery fee. This value can be change on driver level also', 'key'=>'DRIVER_PERCENT_FROM_DELIVERY_FEE', 'value'=>'100', 'onlyin'=>'ft'],
 
-                ['title'=>'Demo vendor slug', 'separator'=>'Other settings', 'help'=>'Enter the domain - slug of your demo vendor that will show on the landing page', 'key'=>'demo_restaurant_slug', 'value'=>'leukapizza', 'onlyin'=>'qrsaas'],
+                ['title'=>'Demo vendor slug', 'separator'=>'Other settings', 'help'=>'Enter the domain - slug of your demo vendor that will show on the landing page', 'key'=>'demo_restaurant_slug', 'value'=>'gangnamfalafel', 'onlyin'=>'qrsaas'],
                 ['title'=>'Vendor entity name', 'help'=>'Ex. Company, Restaurant, Shop, Business etc', 'key'=>'VENDOR_ENTITY_NAME', 'value'=>'Restaurant'],
                 ['title'=>'Vendor entity name in plural', 'help'=>'Ex. Companies, Restaurants, Shops, Businesses etc', 'key'=>'VENDOR_ENTITY_NAME_PLURAL', 'value'=>'Restaurants'],
                 ['title'=>'Url route for vendor', 'help'=>'If you want to change the link the vendor is open in. ex yourdomain.com/shop/shopname. shop - should be the value here', 'key'=>'URL_ROUTE', 'value'=>'restaurant'],
                 ['title'=>'Url route for vendor in plural', 'help'=>'If you want to change the link the vendor management is open in. ex yourdomain.com/shops. shops - should be the value here', 'key'=>'URL_ROUTE_PLURAL', 'value'=>'restaurants'],
-                ['title'=>'Apps download code', 'help'=>'If you have extended license, or some specific product, we will send you App download code. Send us ticket.', 'key'=>'EXTENDED_LICENSE_DOWNLOAD_CODE', 'value'=>''], 
+                ['title'=>'Send ticket', 'help'=>'Send ticket.', 'key'=>'EXTENDED_LICENSE_DOWNLOAD_CODE', 'value'=>''], 
                 ['title'=>'Print templates images', 'help'=>'Links to images representing the images for the templates. You can use remote images', 'key'=>'templates', 'value'=>'/impactfront/img/menu_template_1.jpg,/impactfront/img/menu_template_2.jpg', 'onlyin'=>'qrsaas'],
                 ['title'=>'Print templates zip', 'help'=>'Link to .zip representing the template for download. You can use remote file', 'key'=>'linkToTemplates', 'value'=>'/impactfront/img/templates.zip', 'onlyin'=>'qrsaas'],
 
