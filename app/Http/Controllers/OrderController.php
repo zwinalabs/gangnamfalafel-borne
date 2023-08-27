@@ -349,9 +349,10 @@ class OrderController extends Controller
             //Web order
             $mobileLikeRequest=$this->toMobileLike($request);
         }
+        
         //hiboutk_data
-        $dataHiboutik =  array("paycash"  => ($request->paycash)??false, "hiboutik_sale_id" => ($request->hiboutik_sale_id)??0) ;
-
+        $dataHiboutik =  array("paycash" => (($request->paycash)??false), "hiboutik_sale_id" => (($request->hiboutik_sale_id)??0)) ;
+        
         //Data
         $vendor_id =  $mobileLikeRequest->vendor_id;
         $expedition= $mobileLikeRequest->delivery_method;
@@ -400,6 +401,7 @@ class OrderController extends Controller
             notify()->error($validatorOnMaking->errors()->first()); 
             return $orderRepo->redirectOrInform($dataHiboutik); 
         }
+        
         return $orderRepo->redirectOrInform($dataHiboutik);
     }
 
@@ -1138,9 +1140,12 @@ class OrderController extends Controller
         $receipt = __('No receipt.');
         //add order items to Hiboutik
         $orderToPrint = $this->addProductToSale($order);
+        /*var_dump("rscode_pin: ".$request->has('rscode_pin'));
+        var_dump("paycash: ".$request->has('paycash'));
+        exit;*/
         try{
             //if borne payment failure use codepin to resolve the issue
-            if ($request->has('rscode_pin'))
+            if ($request->has('rscode_pin') && !empty($request->rscode_pin))
             {
                 if($order->restorant->code_pin == $request->rscode_pin){
                     $bornePayment = 'unpaid';
@@ -1148,8 +1153,8 @@ class OrderController extends Controller
                     $order->payment_status = $bornePayment;
                     $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                     $order->update();
-                    //add new hiboutik sale and print all receipts
-                    $this->savePrintOrder_hiboutik($orderToPrint);
+                    //print all receipts
+                    $this->printReceipts($orderToPrint);
                     //notify dashboard user
                     $this->notifyOwnerGanFal($order);
                     $errMsg = __("Payment")." ".__("Cash");
@@ -1167,15 +1172,16 @@ class OrderController extends Controller
             }
 
             //Paycash payment methode
-            if($request->has('paycach') && !empty($request->paycach))
+            if($request->has('paycash') && !empty($request->paycash))
             {
                 $bornePayment = 'unpaid';
                 $order->payment_method = "cod";
                 $order->payment_status = $bornePayment;
                 $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                 $order->update();
-                //add new hiboutik sale and print all receipts
-                $this->savePrintOrder_hiboutik($orderToPrint);
+                //print all receipts
+                $orderToPrint['message'] = __("Pay at the cash");
+                $this->printReceipts($orderToPrint);
                 //notify dashboard user
                 $this->notifyOwnerGanFal($order);
                 $errMsg = __("Payment")." ".__("Cash");
@@ -1224,8 +1230,8 @@ class OrderController extends Controller
                         $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                         $order->update();
                         $errMsg = '';
-                        //add new hiboutik sale and print all receipts
-                        $this->savePrintOrder_hiboutik($orderToPrint);
+                        //print all receipts
+                        $this->printReceipts($orderToPrint);
                         //notify dashboard user
                         $this->notifyOwnerGanFal($order);
                         $receipt = nl2br($eMonetiqueReceipt, false);
@@ -1244,30 +1250,6 @@ class OrderController extends Controller
                     $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
                     return response()->json($params);
                 }
-
-                /*if($eMonetiqueResult == "OK"){
-                    $bornePayment = 'paid';
-                    $order->payment_status = $bornePayment;
-                    $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
-                    $order->update();
-                    $receipt = nl2br($eMonetiqueReceipt, false);
-                    $errMsg = '';
-                    //add new hiboutik sale and print all receipts
-                    /////$this->savePrintOrder_hiboutik($order);
-                    //notify dashboard user
-                    $this->notifyOwnerGanFal($order);
-                    $html = view('orders.successborne', 
-                    compact('order','errMsg','bornePayment', 'error', 'receipt' ))->render();
-                    $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => ''];
-                        return response()->json($params);
-                }else{
-                    $bornePayment = 'unpaid';
-                    $error = true;
-                    $html = view('orders.errorborne', 
-                    compact('order','errMsg','bornePayment','error'))->render();
-                    $params = ['order_id' => $order->id,'status' => 200, 'html' => $html,'errMsg' => $errMsg];
-                    return response()->json($params);
-                }*/
             }
         }catch(\Exception $e) {
             $error = "Error: ".$e->getCode()." : ".$e->getMessage();
@@ -1299,29 +1281,32 @@ class OrderController extends Controller
         
     private function addProductToSale($order){
         $printing_gateway = env('PRINTING_GATEWAY','http://hiboutik.test');
-        $hiboutik_tax_val = Http::get($printing_gateway.'/gettaxes.php');
-        $hiboutik_tax_val = floatval($hiboutik_tax_val);
+        $response = Http::get($printing_gateway.'/gettaxes.php');
+        if($response->successful()){
+            $hiboutik_tax_val =  number_format($response->json()["tax_value"], 2);
+        }else{
+            $hiboutik_tax_val = number_format(0.100, 2);
+        }
         $orderToPrint['sale_id'] = $order->sale_id_hiboutik;
         foreach ($order->items()->get() as $key => $item) {
             //add line items to order to print
             $orderToPrint['line_items'][] = array(
                 'quantity'=>$item->pivot->qty, 
-                'product_model' =>$item->name , 
+                'product_model' => $item->name ,
                 'item_unit_gross' => $item->pivot->variant_price ?? $item->price, 
                 'product_currency' => env('CASHIER_CURRENCY', 'EUR')
             );
             if(!empty($item->product_id_hiboutik)){
-                $promise = Http::async()->get("/api/add-product-sale-hiboutik", [
+                $response = Http::get(route('hiboutik.addProductToSale'), [
                     'sale_id' => $order->sale_id_hiboutik,
                     'product_id_hiboutik' => $item->product_id_hiboutik,
                     'quantity' => $item->pivot->qty
-                ])->then(function ($response) {
-                    if($response->successful()){
-                        $addArray[$order->id][$product_id_hiboutik] = "ok";
-                    }else{
-                        $addArray[$order->id][$product_id_hiboutik] = "ko";
-                    }
-                });
+                ]);
+                if($response->successful()){
+                    $addArray[$order->id][$item->product_id_hiboutik] = "ok";
+                }else{
+                    $addArray[$order->id][$item->product_id_hiboutik] = "ko";
+                }
             }
         }
         //define taxes
@@ -1330,29 +1315,28 @@ class OrderController extends Controller
         $tax_value_p = ($tax_value*100)."%";
         $total_vat = number_format($order_price*$tax_value, 2);
         $total_net = number_format($order_price - $total_vat, 2);
-        $orderToPrint["taxes"] = [
-            "tax_value" => $taxVal,
+        $orderToPrint["taxes"][] = [
+            "tax_value" => $tax_value,
             "tax_value_p"=>  $tax_value_p,
             "total_net"=>  $total_net,
             "total_vat"=> $total_vat  ,
             "total_gross"=>  number_format($total_net+$total_vat, 2)
         ];
-        $orderToPrint['created_at'] = $order->created_at;
+        $orderToPrint['created_at'] = $order->created_at->locale(config('app.locale'))->isoFormat('YYYY-MM-DD HH:mm:ss');
+        $orderToPrint['message'] = "";
         return $orderToPrint;
     }
 
-    private function savePrintOrder_hiboutik($order){
-        if(count($order) > 0){
-            $promise = Http::get("/api/add-product-sale-hiboutik", [
-                'order' => $order
-            ])->then(function ($response) {
-                if($response->successful()){
-                    $addArray[$order->id][$product_id_hiboutik] = "ok";
-                }else{
-                    $addArray[$order->id][$product_id_hiboutik] = "ko";
-                }
-            });
-            
-        }
+    private function printReceipts($order){
+
+        $promise = Http::async()->get(route("hiboutik.printOrderHiboutik"), [
+            'order' => $order
+        ])->then(function ($response) {
+            if($response->successful()){
+                $addArray[$order->id] = "ok";
+            }else{
+                $addArray[$order->id] = "ko";
+            }
+        });
     }
 }
