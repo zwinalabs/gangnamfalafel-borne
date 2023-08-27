@@ -181,6 +181,7 @@ function hideCheckoutDetailsModel(){
 function showCheckoutModel(){
     hideCheckoutDetailsModel();
     enableCheckoutBorneContent();
+    getHiboutikNewSale();
     $("#checkoutBorneModal").show();
 }
 
@@ -202,7 +203,9 @@ function storeOrder(){
         paymentType:$('#paymentType').val(),
         phone:$('#client_phone').val(),
         comment: $('#comment').val(),
-        timeslot:$('#timeslot').val()
+        timeslot:$('#timeslot').val(),
+        paycash:false,
+        hiboutik_sale_id:$('#hiboutik_sale_id').val()
     };
     
     disableCheckoutBorneContent();
@@ -362,7 +365,8 @@ var storeOrderCash = function(){
         phone:$('#client_phone').val(),
         comment: $('#comment').val(),
         timeslot:$('#timeslot').val(),
-        paycash:true
+        paycash:true,
+        hiboutik_sale_id:$('#hiboutik_sale_id').val(),
     };
     
     axios.post('/order', data )
@@ -376,3 +380,35 @@ var storeOrderCash = function(){
     });
 
 }
+/**
+ * Create new Hiboutik Sale and get sale_id
+ */
+var getHiboutikNewSale = function(){
+    axios.get('/api/new-sale-hiboutik', {params: {store_id : 1}})
+    .then(function(response) {
+        let hiboutik = response.data;
+        localStorage.setItem("hiboutik_sale_id", hiboutik.sale_id);
+        $('#hiboutik_sale_id').val(hiboutik.sale_id)
+        console.log("hiboutik_sale_id: "+hiboutik.sale_id);
+    }).finally(() => {
+        console.log("new hiboutik_sale finally");
+    });
+}
+/**
+ * Add all cart product to Hiboutik using the created sale_id
+ */
+ /*var addProductToHiboutikNewSale = function(){
+    let data = {
+        store_id : 1,
+
+    };
+    axios.get('/api/add-product-sale-hiboutik', {params: data})
+    .then(function(response) {
+        let hiboutik = response.data;
+        localStorage.setItem("hiboutik_sale_id", hiboutik.sale_id);
+        $('#hiboutik_sale_id').val(hiboutik.sale_id)
+        console.log("hiboutik_sale_id: "+hiboutik.sale_id);
+    }).finally(() => {
+
+    });
+}*/
