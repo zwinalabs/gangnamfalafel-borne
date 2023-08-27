@@ -190,20 +190,22 @@ class HiboutikController extends Controller
      * @param  mixed $order
      * @return string
      */
-    private function printOrderHiboutik(Request $request){
+    public function printOrderHiboutik(Request $request){
         $printing_gateway = $this->getPrintingGateway();
         $store_id == env('HIBOUTIK_STORE_ID', 1); //add this to .env file or DataBase
         $order = $request->order;
+        $print_message = [];
         if ($order && !empty($order["sale_id"]))
         {
+            $print_message['sale_id'] = $order["sale_id"];
             //we start printing receipt
             $promise = Http::async()->get(route("hiboutik.printReceipt"), [
                 'order' => $order
             ])->then(function ($response) {
                 if($response->successful()){
-                    return $response->json()['print_receipt'];
+                    $print_message['receipt'] = $response->json()['print_receipt'];
                 }else{
-                    return "error printReceiptKitchen";
+                    $print_message['receipt'] = "error printReceipt";
                 }
             });
              //we start printing receipt kitchen
@@ -211,27 +213,22 @@ class HiboutikController extends Controller
                 'order' => $order
             ])->then(function ($response) {
                 if($response->successful()){
-                    return $response->json()['print_receipt'];
+                    $print_message['kitchen'] = $response->json()['print_receipt'];
                 }else{
-                    return "error printReceiptKitchen";
+                    $print_message['kitchen'] = "error printReceiptKitchen";
                 }
             });
-            //we close the sale using sale_id
-            $response = Http::get(route("hiboutik.closeSale"), [
-                'sale_id' => $order["sale_id"],
-            ]);
-            if($response->successful()){
-                return $response->json();
-            }else{
-                return "error close hiboutik sale";
-            }
+            
         }else{
-            echo "'sale_id' Key does not exist!";
+            $print_message['sale_id'] =  "'sale_id' Key does not exist!";
         }
+        return $print_message;
     }
-
+  
     /**
-     * define the printing Gateway link
+     * getPrintingGateway define the printing Gateway link
+     *
+     * @return void
      */
     private function getPrintingGateway(){
         return env('PRINTING_GATEWAY','http://hiboutik.test');

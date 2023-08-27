@@ -8,7 +8,7 @@
         @if(!config('app.issd'))
             <li class="nav-item">
                 <a class="nav-link" href="/live">
-                    <i class="ni ni-basket text-success"></i> {{ __('Live Orders') }}<div class="blob red"></div>
+                    <i class="ni ni-basket text-success"></i> {{ __('Live Orders') }}
                 </a>
             </li>
         @endif
@@ -16,7 +16,7 @@
         @if(!config('app.issd'))
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('orders.index') }}">
-                    <i class="ni ni-basket text-orangse"></i> {{ __('Orders') }}
+                    <i class="ni ni-basket text-orangse"></i> {{ __('Orders') }}<div class="blob red"></div>
                 </a>
             </li>
         @endif

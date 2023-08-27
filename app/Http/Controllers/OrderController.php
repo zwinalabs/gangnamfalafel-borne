@@ -1140,6 +1140,7 @@ class OrderController extends Controller
         $receipt = __('No receipt.');
         //add order items to Hiboutik
         $orderToPrint = $this->addProductToSale($order);
+        $closeSaleMsg = $this->closeHiboutikSale($orderToPrint);
         /*var_dump("rscode_pin: ".$request->has('rscode_pin'));
         var_dump("paycash: ".$request->has('paycash'));
         exit;*/
@@ -1207,18 +1208,17 @@ class OrderController extends Controller
                 );
                 $jsonData = json_encode($data);
 
-
                 // E-Monetique Query 
                 // send request to emonetique payment borne via post request, tested at POST/GET/PUT
                 // Prod: http://192.168.1.200:8400/borne
                 // Test: https://gobiz.tn/borne
                 
                 ///// v.test response after 10 seconds depends of api is up/down
-                //$response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test', $data);
+                $response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test', $data);
                 
                 ///// v.prod response after 10 seconds depends of api is up/down
 
-                $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
+                //$response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
                 
                 if($response->successful()){
                     $eMonetiqueResult = $response->json()['Result'];
@@ -1326,9 +1326,35 @@ class OrderController extends Controller
         $orderToPrint['message'] = "";
         return $orderToPrint;
     }
-
+        
+    /**
+     * closeSale
+     *
+     * @param  mixed $order
+     * @return void
+     */
+    private function closeHiboutikSale($order){
+        $print_message = [];
+        //we close the sale using sale_id
+        if($order["sale_id"] > 0){
+            $response = Http::get(route("hiboutik.closeSale"), [
+                'sale_id' => $order["sale_id"],
+            ]);
+            if($response->successful()){
+                $print_message['closesale'] =  $response->json();
+            }else{
+                $print_message['closesale'] = "error close hiboutik sale";
+            }
+        }
+        return $print_message;
+    }
+    /**
+     * printReceipts
+     *
+     * @param  mixed $order
+     * @return void
+     */
     private function printReceipts($order){
-
         $promise = Http::async()->get(route("hiboutik.printOrderHiboutik"), [
             'order' => $order
         ])->then(function ($response) {
