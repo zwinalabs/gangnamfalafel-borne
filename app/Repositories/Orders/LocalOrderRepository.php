@@ -82,15 +82,16 @@ class LocalOrderRepository extends BaseOrderRepository implements OrderTypeInter
         
     }
 
-    public function redirectOrInform($paycach=false){
+    public function redirectOrInform($dataHiboutik=[]){
         if($this->status){
             if($this->paymentRedirect==null){
                 //We don't have payment redirects
                 if($this->isNewOrder){
                     //New order - redirect to success page
-                    $data = ['order' => $this->order, 'paycach' => $paycach];
+                    $data = ['order' => $this->order, 'paycash' => $dataHiboutik['paycash']];
+                    
                     //if isBorne
-                        $this->updateOrderBorne("BORNE");
+                        $this->updateOrderBorne("BORNE", $dataHiboutik['hiboutik_sale_id'] );
                         return redirect()->route('order.success', $data)->withCookie(cookie('orders', $this->listOfOrders, 360));
                         /**return response()->json(
                             [
@@ -139,11 +140,12 @@ class LocalOrderRepository extends BaseOrderRepository implements OrderTypeInter
         $this->listOfOrders = implode(',', $previousOrderArray);
     }
 
-    public function updateOrderBorne($borne){
+    public function updateOrderBorne($borne, $sale_id = null){
         $this->order->payment_method = $borne;
-
+        $this->order->sale_id_hiboutik = $sale_id;
         $this->order->update();
     }
+    
 
     
 }
