@@ -208,8 +208,8 @@ class HiboutikController extends Controller
                     $print_message['receipt'] = "error printReceipt";
                 }
             });
-             //we start printing receipt kitchen
-             $promise = Http::async()->get(route("hiboutik.printReceiptKitchen"), [
+            /* //we start printing receipt kitchen
+            $promise = Http::async()->get(route("hiboutik.printReceiptKitchen"), [
                 'order' => $order
             ])->then(function ($response) {
                 if($response->successful()){
@@ -218,6 +218,7 @@ class HiboutikController extends Controller
                     $print_message['kitchen'] = "error printReceiptKitchen";
                 }
             });
+            */
             
         }else{
             $print_message['sale_id'] =  "'sale_id' Key does not exist!";

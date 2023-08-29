@@ -891,8 +891,60 @@ class OrderController extends Controller
         }
 
         $order->status()->attach([$status_id_to_attach => ['comment'=>'', 'user_id' => auth()->user()->id]]);
+        //github Issue#
+        $message_redirect = "";
+        if ($status_id_to_attach.'' == '2' || $status_id_to_attach.'' == '3') {
+            $printing_gateway = env('PRINTING_GATEWAY','http://hiboutik.test');
+            $response = Http::get($printing_gateway.'/gettaxes.php');
+            if($response->successful()){
+                if (array_key_exists('tax_value', $response->json())) {
+                    $hiboutik_tax_val =  number_format($response->json()["tax_value"], 2);
+                }else{
+                    $hiboutik_tax_val = number_format(0.100, 2);
+                }
+            }else{
+                $hiboutik_tax_val = number_format(0.100, 2);
+            }
+            $orderToPrint['sale_id'] = $order->sale_id_hiboutik;
+            foreach ($order->items()->get() as $key => $item) {
+                //add line items to order to print
+                $orderToPrint['line_items'][] = array(
+                    'quantity'=>$item->pivot->qty, 
+                    'product_model' => $item->name ,
+                    'item_unit_gross' => $item->pivot->variant_price ?? $item->price, 
+                    'product_currency' => env('CASHIER_CURRENCY', 'EUR')
+                );
 
+            }
+            //define taxes
+            $order_price = $order->order_price;
+            $tax_value = number_format($hiboutik_tax_val,2);
+            $tax_value_p = ($tax_value*100)."%";
+            $total_vat = number_format($order_price*$tax_value, 2);
+            $total_net = number_format($order_price - $total_vat, 2);
+            $orderToPrint["taxes"][] = [
+                "tax_value" => $tax_value,
+                "tax_value_p"=>  $tax_value_p,
+                "total_net"=>  $total_net,
+                "total_vat"=> $total_vat,
+                "total_gross"=>  number_format($total_net+$total_vat, 2)
+            ];
+            $orderToPrint['created_at'] = $order->created_at->locale(config('app.locale'))->isoFormat('YYYY-MM-DD HH:mm:ss');
+            $orderToPrint['message'] = "Kitchen";
+            //we start printing kitchen receipt 
+            $promise = Http::async()->get(route("hiboutik.printReceiptKitchen"), [
+                'order' => $orderToPrint
+            ])->then(function ($response) {
+                if($response->successful()){
+                    $print_message['kitchen'] = $response->json()['print_receipt'];
+                }else{
+                    $print_message['kitchen'] = "error printReceiptKitchen";
+                }
+            });
 
+            $closeSaleMsg = $this->closeHiboutikSale($orderToPrint);
+            $message_redirect = "<br>".__("Kitchen Receipt printed") ."<br>". __("Hiboutik sale closed");
+        }
         //Dispatch event
         if($alias=="accepted_by_restaurant"){
             OrderAcceptedByVendor::dispatch($order);
@@ -906,8 +958,7 @@ class OrderController extends Controller
             OrderAcceptedByAdmin::dispatch($order);
         }
 
-
-        return redirect()->route('orders.index')->withStatus(__('Order status succesfully changed.'));
+        return redirect()->route('orders.index')->withStatus(__('Order status succesfully changed.').$message_redirect);
     }
 
     public function rateOrder(Request $request, Order $order)
@@ -1140,10 +1191,7 @@ class OrderController extends Controller
         $receipt = __('No receipt.');
         //add order items to Hiboutik
         $orderToPrint = $this->addProductToSale($order);
-        $closeSaleMsg = $this->closeHiboutikSale($orderToPrint);
-        /*var_dump("rscode_pin: ".$request->has('rscode_pin'));
-        var_dump("paycash: ".$request->has('paycash'));
-        exit;*/
+
         try{
             //if borne payment failure use codepin to resolve the issue
             if ($request->has('rscode_pin') && !empty($request->rscode_pin))
@@ -1217,7 +1265,7 @@ class OrderController extends Controller
                 //$response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test', $data);
                 
                 ///// v.prod response after 10 seconds depends of api is up/down
-                $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post('http://192.168.1.200:8400/borne');
+                $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post(env('E_MONETIQUE_URL'));
                 
                 if($response->successful()){
                     $eMonetiqueResult = $response->json()['Result'];
