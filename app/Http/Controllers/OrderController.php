@@ -943,7 +943,7 @@ class OrderController extends Controller
             });
 
             $closeSaleMsg = $this->closeHiboutikSale($orderToPrint);
-            $message_redirect = "<br>".__("Kitchen Receipt printed") ."<br>". __("Hiboutik sale closed");
+            $message_redirect = ". ".__("Kitchen Receipt printed") .". ". __("Hiboutik sale closed");
         }
         //Dispatch event
         if($alias=="accepted_by_restaurant"){
