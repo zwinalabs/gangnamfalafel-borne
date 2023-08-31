@@ -320,7 +320,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
 
         $view = value($component->resolveView(), $data);
 
-        if ($view instanceof View) {
+        if ($view instanceof View){
             return $view->with($data)->render();
         } elseif ($view instanceof Htmlable) {
             return $view->toHtml();

@@ -36,7 +36,7 @@
 <tr>
     <td>
         
-        <a class="btn badge badge-success badge-pill" href="{{ route('orders.show',$order->id )}}">#{{ $order->id }}</a>
+        <a class="btn badge badge-success badge-pill" href="{{ route('orders.show',$order->id )}}">#{{ $order->sale_id_hiboutik??"---"  }}</a>
     </td>
     @hasrole('admin|driver')
     <th scope="row">

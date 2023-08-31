@@ -54,3 +54,18 @@ $(document).ready(function() {
     }
     itemSearch();
 });
+
+var toggleTableGobiz = function(elemId) {
+  // Get the button that triggered this
+  let theButton = $('#expand-button'+elemId);
+  let parentElem = theButton.parent('#accordion'+elemId);
+  if(parentElem.hasClass('collapsed')){
+    parentElem.removeClass('collapsed');
+    $('#hide-table-padding'+elemId).show();
+    $('#collapse'+elemId).show();
+  }else{
+    parentElem.addClass('collapsed');
+    $('#hide-table-padding'+elemId).hide();
+    $('#collapse'+elemId).hide();
+  }
+}
