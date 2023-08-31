@@ -1406,9 +1406,9 @@ class OrderController extends Controller
             'order' => $order
         ]);
         if($response->successful()){
-            $addArray[$order->id] = "ok";
+            $addArray[$order["sale_id"]] = "ok";
         }else{
-            $addArray[$order->id] = "ko";
+            $addArray[$order["sale_id"]] = "ko";
         }
     }
 }
