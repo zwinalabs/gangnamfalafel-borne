@@ -8,7 +8,7 @@
                     <div class="swal2-icon swal2-error swal2-animate-error-icon" style="display: flex;"><span class="swal2-x-mark"><span class="swal2-x-mark-line-left"></span><span class="swal2-x-mark-line-right"></span></span></div>
                     <h2 class="display-2 display-payment-success">{{ $errMsg }}</h2>
                     <h1 class="mb-4">
-                        <span class="badge badge-primary">{{ __('Order')." #".$order->id }}</span>
+                        <span class="badge badge-primary">{{ __('Order')." #".($order->sale_id_hiboutik)??$order->id }}</span>
                     </h1>
                     <div class="row col-12 pr-0 m-3">
                         <div class="col-4" >
