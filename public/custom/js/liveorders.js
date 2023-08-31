@@ -17,8 +17,8 @@ function getLiveOrders(){
 
 window.onload = function () {
 
-    var audio = new Audio('https://soundbible.com/mp3/old-fashioned-door-bell-daniel_simon.mp3');
-    var welcomeAudio = new Audio('https://soundbible.com/mp3/Blop-Mark_DiAngelo-79054334.mp3');
+    var audio = new Audio('http://gangnamfalafel-borne.test/custom/media/mp3/neworder.mp3');
+    var welcomeAudio = new Audio('http://gangnamfalafel-borne.test/custom/media/mp3/welcome.mp3');
 
     //VUE CART
     liveOrders = new Vue({

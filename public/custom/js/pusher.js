@@ -4,9 +4,9 @@ $(document).ready(function() {
     // Enable pusher logging - don't include this in production
     if(PUSHER_APP_KEY){
 
-        var audio = new Audio('https://soundbible.com/mp3/old-fashioned-door-bell-daniel_simon.mp3');
+        var audio = new Audio('http://gangnamfalafel-borne.test/custom/media/mp3/neworder.mp3');
 
-        Pusher.logToConsole = true;
+        Pusher.logToConsole = false;
 
         var pusher = new Pusher(PUSHER_APP_KEY, {
             cluster: PUSHER_APP_CLUSTER
@@ -25,9 +25,9 @@ $(document).ready(function() {
     }
 
     function subscribePerOrder(orderID){
-        var audio = new Audio('https://soundbible.com/mp3/old-fashioned-door-bell-daniel_simon.mp3');
+        var audio = new Audio('http://gangnamfalafel-borne.test/custom/media/mp3/neworder.mp3');
 
-        Pusher.logToConsole = true;
+        Pusher.logToConsole = false;
 
         var pusherForOrder = new Pusher(PUSHER_APP_KEY, {
             cluster: PUSHER_APP_CLUSTER
