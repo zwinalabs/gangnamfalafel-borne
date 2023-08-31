@@ -155,7 +155,12 @@ class HiboutikController extends Controller
             'order' => $request->order
         ]);
         if($response->successful()){
-            return $response->json()['print_receipt'];
+            if (array_key_exists('print_receipt', $response->json())) {
+                $print_receipt =  $response->json()["print_receipt"];
+            }else{
+                $print_receipt = "error printReceipt";
+            }
+            return $print_receipt;
         }else{
             return "error printReceipt";
         }
@@ -176,7 +181,12 @@ class HiboutikController extends Controller
             'order' => $request->order
         ]);
         if($response->successful()){
-            return $response->json()['print_receipt'];
+            if (array_key_exists('print_receipt', $response->json())) {
+                $print_receipt =  $response->json()["print_receipt"];
+            }else{
+                $print_receipt = "error printReceiptKitchen";
+            }
+            return $print_receipt;
         }else{
             return "error printReceiptKitchen";
         }

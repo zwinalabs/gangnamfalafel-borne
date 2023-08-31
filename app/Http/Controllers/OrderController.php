@@ -935,9 +935,12 @@ class OrderController extends Controller
             $response = Http::get(route("hiboutik.printReceiptKitchen"), [
                 'order' => $orderToPrint
             ]);
-
             if($response->successful()){
-                $print_message['kitchen'] = $response->json()['print_receipt'];
+                if (array_key_exists('print_receipt', $response->json())) {
+                    $print_message['kitchen'] =  $response->json();
+                }else{
+                    $print_message['kitchen'] = "error printReceiptKitchen";
+                }
             }else{
                 $print_message['kitchen'] = "error printReceiptKitchen";
             }
