@@ -930,9 +930,9 @@ class OrderController extends Controller
                 "total_gross"=>  number_format($total_net+$total_vat, 2)
             ];
             $orderToPrint['created_at'] = $order->created_at->locale(config('app.locale'))->isoFormat('YYYY-MM-DD HH:mm:ss');
-            $orderToPrint['message'] = "Kitchen";
+            $orderToPrint['message'] = "***".__("Kitchen")."***";
             //we start printing kitchen receipt 
-            $promise = Http::async()->get(route("hiboutik.printReceiptKitchen"), [
+            $promise = Http::get(route("hiboutik.printReceiptKitchen"), [
                 'order' => $orderToPrint
             ])->then(function ($response) {
                 if($response->successful()){
@@ -1402,7 +1402,7 @@ class OrderController extends Controller
      * @return void
      */
     private function printReceipts($order){
-        $promise = Http::async()->get(route("hiboutik.printOrderHiboutik"), [
+        $promise = Http::get(route("hiboutik.printOrderHiboutik"), [
             'order' => $order
         ])->then(function ($response) {
             if($response->successful()){
