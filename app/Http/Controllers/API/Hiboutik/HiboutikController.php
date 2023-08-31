@@ -151,7 +151,7 @@ class HiboutikController extends Controller
      */
     public function printReceipt(Request $request){
         $printing_gateway = $this->getPrintingGateway();
-        $promise = Http::get($printing_gateway.'/print-receipt.php', [
+        $response = Http::get($printing_gateway.'/print-receipt.php', [
             'order' => $request->order
         ]);
         if($response->successful()){
@@ -172,7 +172,7 @@ class HiboutikController extends Controller
      */
     public function printReceiptKitchen(Request $request){
         $printing_gateway = $this->getPrintingGateway();
-        $promise = Http::get($printing_gateway.'/print-kitchen.php', [
+        $response = Http::get($printing_gateway.'/print-kitchen.php', [
             'order' => $request->order
         ]);
         if($response->successful()){
