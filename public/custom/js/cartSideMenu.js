@@ -286,6 +286,7 @@ var successCallClear = function(){
     localStorage.setItem("cartLS", JSON.stringify(cartLS));
     localStorage.setItem("comment","");
     localStorage.setItem("onsiteTakeAway", "");
+    localStorage.setItem("hiboutik_sale_id", "");
     getCartContentAndTotalPrice(true);
     hideQtyElements();
     $("button[id^='list-express-trash-']").trigger('click');
