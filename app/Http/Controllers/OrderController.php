@@ -930,17 +930,17 @@ class OrderController extends Controller
                 "total_gross"=>  number_format($total_net+$total_vat, 2)
             ];
             $orderToPrint['created_at'] = $order->created_at->locale(config('app.locale'))->isoFormat('YYYY-MM-DD HH:mm:ss');
-            $orderToPrint['message'] = "***".__("Kitchen")."***";
+            $orderToPrint['message'] = __("Kitchen");
             //we start printing kitchen receipt 
-            $promise = Http::get(route("hiboutik.printReceiptKitchen"), [
+            $response = Http::get(route("hiboutik.printReceiptKitchen"), [
                 'order' => $orderToPrint
-            ])->then(function ($response) {
-                if($response->successful()){
-                    $print_message['kitchen'] = $response->json()['print_receipt'];
-                }else{
-                    $print_message['kitchen'] = "error printReceiptKitchen";
-                }
-            });
+            ]);
+
+            if($response->successful()){
+                $print_message['kitchen'] = $response->json()['print_receipt'];
+            }else{
+                $print_message['kitchen'] = "error printReceiptKitchen";
+            }
 
             $closeSaleMsg = $this->closeHiboutikSale($orderToPrint);
             $message_redirect = ". ".__("Kitchen Receipt printed") .". ". __("Hiboutik sale closed");
@@ -1402,14 +1402,13 @@ class OrderController extends Controller
      * @return void
      */
     private function printReceipts($order){
-        $promise = Http::get(route("hiboutik.printOrderHiboutik"), [
+        $response = Http::get(route("hiboutik.printReceipt"), [
             'order' => $order
-        ])->then(function ($response) {
-            if($response->successful()){
-                $addArray[$order->id] = "ok";
-            }else{
-                $addArray[$order->id] = "ko";
-            }
-        });
+        ]);
+        if($response->successful()){
+            $addArray[$order->id] = "ok";
+        }else{
+            $addArray[$order->id] = "ko";
+        }
     }
 }

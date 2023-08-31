@@ -199,15 +199,14 @@ class HiboutikController extends Controller
         {
             $print_message['sale_id'] = $order["sale_id"];
             //we start printing receipt
-            $promise = Http::async()->get(route("hiboutik.printReceipt"), [
+            $response = Http::get(route("hiboutik.printReceipt"), [
                 'order' => $order
-            ])->then(function ($response) {
-                if($response->successful()){
-                    $print_message['receipt'] = $response->json()['print_receipt'];
-                }else{
-                    $print_message['receipt'] = "error printReceipt";
-                }
-            });
+            ]);
+            if($response->successful()){
+                $print_message['receipt'] = $response->json()['print_receipt'];
+            }else{
+                $print_message['receipt'] = "error printReceipt";
+            }
             /* //we start printing receipt kitchen
             $promise = Http::async()->get(route("hiboutik.printReceiptKitchen"), [
                 'order' => $order
