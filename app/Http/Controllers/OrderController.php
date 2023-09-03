@@ -894,7 +894,7 @@ class OrderController extends Controller
         //github Issue#
         $message_redirect = "";
         if ($status_id_to_attach.'' == '2' || $status_id_to_attach.'' == '3') {
-            $printing_gateway = env('PRINTING_GATEWAY','http://hiboutik.test');
+            $printing_gateway = $this->getPrintingGateway();
             $response = Http::get($printing_gateway.'/gettaxes.php');
             if($response->successful()){
                 if (array_key_exists('tax_value', $response->json())) {
@@ -931,19 +931,10 @@ class OrderController extends Controller
             ];
             $orderToPrint['created_at'] = $order->created_at->locale(config('app.locale'))->isoFormat('YYYY-MM-DD HH:mm:ss');
             $orderToPrint['message'] = __("Kitchen");
+
             //we start printing kitchen receipt 
-            $response = Http::get(route("hiboutik.printReceiptKitchen"), [
-                'order' => $orderToPrint
-            ]);
-            if($response->successful()){
-                if (array_key_exists('print_receipt', $response->json())) {
-                    $print_message['kitchen'] =  $response->json();
-                }else{
-                    $print_message['kitchen'] = "error printReceiptKitchen";
-                }
-            }else{
-                $print_message['kitchen'] = "error printReceiptKitchen";
-            }
+            $print_message['kitchen'] = $this->printReceiptKitchen($orderToPrint);
+           
 
             $closeSaleMsg = $this->closeHiboutikSale($orderToPrint);
             $message_redirect = ". ".__("Kitchen Receipt printed") .". ". __("Hiboutik sale closed");
@@ -1206,7 +1197,7 @@ class OrderController extends Controller
                     $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                     $order->update();
                     //print all receipts
-                    $this->printReceipts($orderToPrint);
+                    $this->printReceipt($orderToPrint);
                     //notify dashboard user
                     $this->notifyOwnerGanFal($order);
                     $errMsg = __("Payment")." ".__("Cash");
@@ -1233,7 +1224,7 @@ class OrderController extends Controller
                 $order->update();
                 //print all receipts
                 $orderToPrint['message'] = __("Pay at the cash");
-                $this->printReceipts($orderToPrint);
+                $this->printReceipt($orderToPrint);
                 //notify dashboard user
                 $this->notifyOwnerGanFal($order);
                 $errMsg = __("Payment")." ".__("Cash");
@@ -1281,7 +1272,7 @@ class OrderController extends Controller
                         $order->update();
                         $errMsg = '';
                         //print all receipts
-                        $this->printReceipts($orderToPrint);
+                        $this->printReceipt($orderToPrint);
                         //notify dashboard user
                         $this->notifyOwnerGanFal($order);
                         $receipt = nl2br($eMonetiqueReceipt, false);
@@ -1330,7 +1321,7 @@ class OrderController extends Controller
     }
         
     private function addProductToSale($order){
-        $printing_gateway = env('PRINTING_GATEWAY','http://hiboutik.test');
+        $printing_gateway = $this->getPrintingGateway();
         $response = Http::get($printing_gateway.'/gettaxes.php');
         if($response->successful()){
             $hiboutik_tax_val =  number_format($response->json()["tax_value"], 2);
@@ -1398,20 +1389,56 @@ class OrderController extends Controller
         }
         return $print_message;
     }
+
     /**
-     * printReceipts
+     * printReceipt
      *
-     * @param  mixed $order
-     * @return void
+     * @param  mixed $printing_gateway
+     * @param  mixed $sale_id
+     * @return string
      */
-    private function printReceipts($order){
-        $response = Http::get(route("hiboutik.printReceipt"), [
+    private function printReceipt($order){
+        $printing_gateway = $this->getPrintingGateway();
+        $response = Http::post($printing_gateway.'/print-receipt.php', [
             'order' => $order
         ]);
         if($response->successful()){
-            $addArray[$order["sale_id"]] = "ok";
+            $print_receipt =  $response->json();
         }else{
-            $addArray[$order["sale_id"]] = "ko";
+            $print_receipt =  "error printReceipt";
         }
+        return $print_receipt;
+   
+    }
+
+    
+    /**
+     * printReceiptKitchen
+     *
+     * @param  mixed $printing_gateway
+     * @param  mixed $sale_id
+     * @return void
+     */
+    private function printReceiptKitchen($order){
+        $printing_gateway = $this->getPrintingGateway();
+        $response = Http::post($printing_gateway.'/print-kitchen.php', [
+            'order' => $order
+        ]);
+        if($response->successful()){
+            $print_receipt =  $response->json();
+        }else{
+            $print_receipt =  "error printReceiptKitchen";
+        }
+        return $print_receipt;
+
+    }
+
+    /**
+     * getPrintingGateway define the printing Gateway link
+     *
+     * @return void
+     */
+    private function getPrintingGateway(){
+        return env('PRINTING_GATEWAY','http://hiboutik.test');
     }
 }
