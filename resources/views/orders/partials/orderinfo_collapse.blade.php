@@ -88,61 +88,92 @@
          @endforeach
      </ul>
      @endif
-     @if(!empty($order->whatsapp_address))
-        <br/>
-        <h5>{{ __('Address') }}: {{ $order->whatsapp_address }}</h5>
-     @endif
-     @if(!empty($order->comment))
-        <br/>
-        <h5>{{ __('Comment') }}: {{ $order->comment }}</h5>
-     @endif
-     @if(strlen($order->phone)>2)
-        <h5>{{ __('Phone') }}: {{ $order->phone }}</h5>
-     @endif
-     <br />
-     @if(!empty($order->time_to_prepare))
-     <br/>
-     <h5>{{ __('Time to prepare') }}: {{ $order->time_to_prepare ." " .__('minutes')}}</h5>
-     <br/>
-     @endif
-     <h5>{{ __("NET") }}: @money( $order->order_price-$order->vatvalue, $currency ,true)</h5>
-     <h5>{{ __("VAT") }}: @money( $order->vatvalue, $currency,$convert)</h5>
-     <h5>{{ __("Sub Total") }}: @money( $order->order_price, $currency,$convert)</h5>
-     @if($order->delivery_method==1)
-     <h5>{{ __("Delivery") }}: @money( $order->delivery_price, $currency,$convert)</h5>
-     @endif
-     @if ($order->discount>0)
-        <h5>{{ __("Discount") }}: @money( $order->discount, $currency,$convert)</h5>
-        <h5>{{ __("Coupon code") }}: {{$order->coupon}}</h5>
-     @endif
-     <hr />
-     <h4>{{ __("TOTAL") }}: @money( $order->delivery_price+$order->order_price_with_discount, $currency,true)</h4>
-     <hr />
-     <h5>{{ __("Payment method") }}: {{ __(strtoupper($order->payment_method)) }}</h5>
-     <h5>{{ __("Payment status") }}: <span style='color:#03643b'>{{ __(ucfirst($order->payment_status)) }}</span></h5>
-     @if ($order->payment_status=="unpaid"&&strlen($order->payment_link)>5)
-         <button onclick="location.href='{{$order->payment_link}}'" class="btn btn-success">{{ __('Pay now') }}</button>
-     @endif
-     <hr />
-     @if(config('app.isft') || config('app.iswp'))
-         <h5>{{ __("Delivery method") }}: {{ $order->getExpeditionType() }}</h5>
-         <h4>{{ __("Time slot") }}: @include('orders.partials.time', ['time'=>$order->time_formated])</h4>
-     @else
-         <h5>{{ __("Dine method") }}: {{ $order->getExpeditionType() }}</h5>
-         @if ($order->delivery_method!=3)
-             <h4>{{ __("Time slot") }}: @include('orders.partials.time', ['time'=>$order->time_formated])</h4>
-         @endif
-     @endif
+     <table class="table align-items-center">
+        <thead class="thead-light">
+            <tr>
+                @if(!empty($order->whatsapp_address))
+                    <th>{{ __('Address') }}</th>
+                @endif
+                @if(!empty($order->comment) && strlen($order->comment) > 2)
+                    <th>{{ __('Comment') }}</th>
+                @endif
+                @if(strlen($order->phone)>2)
+                    <th>{{ __('Phone') }}</th>
+                @endif
+                @if(!empty($order->time_to_prepare))
+                    <th>{{ __('Time to prepare') }}</th>
+                @endif
+                <th>{{ __("NET") }}</th>
+                <th>{{ __("VAT") }}</th>
+                <th>{{ __("Sub Total") }}</th>
+                <th>{{ __("TOTAL") }}</th>
+            </tr>
+        </thead>
+        <tbody class="list">
+            <tr>
+                @if(!empty($order->whatsapp_address))
+                    <td>{{ $order->whatsapp_address }}</td>
+                @endif
+                @if(!empty($order->comment) && strlen($order->comment) > 2)
+                    <td>{{ $order->comment }}</td>
+                @endif
+                @if(strlen($order->phone)>2)
+                    <td>{{ $order->phone }}</td>
+                @endif
+                @if(!empty($order->time_to_prepare))
+                    <td>{{ $order->time_to_prepare ." " .__('minutes')}}</td>
+                @endif
+                
+                <td>@money( ($order->order_price-$order->vatvalue)-($order->order_price*0.100), $currency ,true)</td>
+                <td>@money( $order->order_price*0.100, $currency,$convert)</td>
+                <td>@money( $order->order_price, $currency,$convert)</td>
+                <td><b>@money( $order->delivery_price+$order->order_price_with_discount, $currency,true)</b></td>
+            </tr>
+        </tbody>
+    </table>
 
-     @if(isset($custom_data)&&count($custom_data)>0)
-        <hr />
-        <h4>{{ __(config('settings.label_on_custom_fields')) }}</h4>
-        @foreach ($custom_data as $keyCutom => $itemValue)
-            <h5>{{ __("custom.".$keyCutom) }}: {{ $itemValue }}</h5>
-        @endforeach
-     @endif
+    <table class="table align-items-center">
+        <thead class="thead-light">
+            <tr>
+                <th>{{ __("Payment method") }}</th>
+                <th>{{ __("Payment status") }}</th>
+            </tr>
+            </thead>
+            <tbody class="list">
+                <tr>
+                    <td>{{ __(strtoupper($order->payment_method)) }}</td>
+                    <td><span style='color:#03643b'>{{ __(ucfirst($order->payment_status)) }}</span></td>
+                </tr>
+            </tbody>
+    </table>    
 
-     
- 
+    <table class="table align-items-center">
+        <thead class="thead-light">
+            <tr>
+                @if(config('app.isft') || config('app.iswp'))
+                    <th>{{ __("Delivery method") }}</th>
+                    <th>{{ __("Time slot") }}</th>
+                @else
+                    <th>{{ __("Dine method") }}</th>
+                    @if ($order->delivery_method!=3)
+                        <th>{{ __("Time slot") }}</th>
+                    @endif
+                @endif
+            </tr>
+            </thead>
+            <tbody class="list">
+                <tr>
+                    @if(config('app.isft') || config('app.iswp'))
+                        <td>{{ $order->getExpeditionType() }}</td>
+                        <td>@include('orders.partials.time', ['time'=>$order->time_formated])</td>
+                    @else
+                        <td>{{ $order->getExpeditionType() }}</td>
+                        @if ($order->delivery_method!=3)
+                            <td> @include('orders.partials.time', ['time'=>$order->time_formated])</td>
+                        @endif
+                    @endif
+                </tr>
+            </tbody>
+    </table>         
  
  </div>

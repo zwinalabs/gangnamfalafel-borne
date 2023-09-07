@@ -35,8 +35,7 @@
 @foreach($orders as $order)
 <tr>
     <td>
-        
-        <a class="btn badge badge-success badge-pill" href="{{ route('orders.show',$order->id )}}">#{{ $order->sale_id_hiboutik??"---"  }}</a>
+        <a class="btn badge badge-success badge-pill" href="{{ route('orders.show',$order->id )}}">#{{ !empty($order->sale_id_hiboutik)?$order->sale_id_hiboutik:$order->id }}</a>
     </td>
     @hasrole('admin|driver')
     <th scope="row">
