@@ -934,7 +934,7 @@ class OrderController extends Controller
 
             //we start printing kitchen receipt 
             $print_message['kitchen'] = $this->printReceiptKitchen($orderToPrint);
-           
+            
 
             $closeSaleMsg = $this->closeHiboutikSale($orderToPrint);
             $message_redirect = ". ".__("Kitchen Receipt printed") .". ". __("Hiboutik sale closed");
@@ -1197,7 +1197,7 @@ class OrderController extends Controller
                     $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                     $order->update();
                     //print all receipts
-                    $this->printReceipt($orderToPrint);
+                    $printReceiptResponse = $this->printReceipt($orderToPrint);
                     //notify dashboard user
                     $this->notifyOwnerGanFal($order);
                     $errMsg = __("Payment")." ".__("Cash");
@@ -1224,7 +1224,7 @@ class OrderController extends Controller
                 $order->update();
                 //print all receipts
                 $orderToPrint['message'] = __("Pay at the cash");
-                $this->printReceipt($orderToPrint);
+                $printReceiptResponse = $this->printReceipt($orderToPrint);
                 //notify dashboard user
                 $this->notifyOwnerGanFal($order);
                 $errMsg = __("Payment")." ".__("Cash");
@@ -1259,7 +1259,7 @@ class OrderController extends Controller
                 //$response = Http::timeout(10)->withHeaders($headers)->post('http://borne.test', $data);
                 
                 ///// v.prod response after 10 seconds depends of api is up/down
-                $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post(env('E_MONETIQUE_URL'));
+                $response = Http::timeout(10)->withBody($jsonData, 'application/json')->withOptions(['headers' => $headers])->post("http://192.168.1.200:8400/borne");
                 
                 if($response->successful()){
                     $eMonetiqueResult = $response->json()['Result'];
@@ -1272,7 +1272,7 @@ class OrderController extends Controller
                         $order->update();
                         $errMsg = '';
                         //print all receipts
-                        $this->printReceipt($orderToPrint);
+                        $printReceiptResponse = $this->printReceipt($orderToPrint);
                         //notify dashboard user
                         $this->notifyOwnerGanFal($order);
                         $receipt = nl2br($eMonetiqueReceipt, false);
@@ -1307,20 +1307,23 @@ class OrderController extends Controller
      * @param  mixed $order
      * @return void
      */
-    private function notifyOwnerGanFal($order){
-        //notfiy 
-        $order->restorant->user->notify((new OrderNotification($order,1,$order->restorant->user))->locale(strtolower(config('settings.app_locale'))));
-
+    private function notifyOwnerGanFal(Order $order){
         //Notify owner with pusher
         if (strlen(config('broadcasting.connections.pusher.secret')) > 4) {
-            event(new PusherNewOrder($order, __('notifications_notification_neworder')));
+          // event(new PusherNewOrder($order, __('notifications_notification_neworder')));
         }
 
         //Dispatch Approved by admin event
-        OrderAcceptedByAdmin::dispatch($order);
+       OrderAcceptedByAdmin::dispatch($order);
     }
-        
-    private function addProductToSale($order){
+            
+    /**
+     * addProductToSale
+     *
+     * @param  mixed $order
+     * @return void
+     */
+    private function addProductToSale(Order $order){
         $printing_gateway = $this->getPrintingGateway();
         $response = Http::get($printing_gateway.'/gettaxes.php');
         if($response->successful()){
@@ -1399,7 +1402,7 @@ class OrderController extends Controller
      */
     private function printReceipt($order){
         $printing_gateway = $this->getPrintingGateway();
-        $response = Http::post($printing_gateway.'/print-receipt.php', [
+        $response = Http::get($printing_gateway.'/print-receipt.php', [
             'order' => $order
         ]);
         if($response->successful()){
@@ -1421,7 +1424,7 @@ class OrderController extends Controller
      */
     private function printReceiptKitchen($order){
         $printing_gateway = $this->getPrintingGateway();
-        $response = Http::post($printing_gateway.'/print-kitchen.php', [
+        $response = Http::get($printing_gateway.'/print-kitchen.php', [
             'order' => $order
         ]);
         if($response->successful()){
