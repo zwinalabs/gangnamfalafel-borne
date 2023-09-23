@@ -46,6 +46,8 @@ class ItemsImport implements ToModel, WithHeadingRow
                     'price' => $row['price'],
                     'category_id' => $CATID,
                     'image' => $row['image'] ? $row['image'] : "",
+                    'available' => $row['active'],
+                    'product_id_hiboutik' => $row['id'],
                 ]); 
             }else{
                 //Update
@@ -53,6 +55,10 @@ class ItemsImport implements ToModel, WithHeadingRow
                 $item->image =$row['image'] ? $row['image'] : "";
                 $item->category_id =$CATID;
                 $item->description =$row['description']?$row['description']:"";
+                $item->product_id_hiboutik = $row['description']?$row['description']:"";
+                $item->available = $row['active']?$row['active']:0;
+                $item->product_id_hiboutik = $row['id']?$row['id']:0;
+
             }
         } else {
             $newCat=new Categories([
@@ -75,6 +81,8 @@ class ItemsImport implements ToModel, WithHeadingRow
                 'price' => $row['price'],
                 'category_id' => $categoryID,
                 'image' => $row['image'] ? $row['image'] : "",
+                'available' => $row['active'],
+                'product_id_hiboutik' => $row['id'],
             ]);
         }
     }
