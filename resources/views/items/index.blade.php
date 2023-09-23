@@ -19,12 +19,12 @@
                         <span class="btn-inner--icon"><i class="fa fa-plus"></i> {{ __('Add new category') }}</span>
                     </button>
                     @if($canAdd)
-                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#modal-import-items" onClick=(setRestaurantId({{ $restorant_id }}))>
-                        <span class="btn-inner--icon"><i class="fa fa-file-excel"></i> {{ __('Import from CSV') }}</span>
+                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#modal-import-items" onClick=(setRestaurantId({{ $restorant_id }}))>
+                        <span class="btn-inner--icon"><i class="fa fa-file-excel"></i> {{ __('Import from Hiboutik CSV') }}</span>
                     </button>
-                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#modal-import-items-hiboutik" onClick=(setRestaurantId({{ $restorant_id }}))>
-                        <span class="btn-inner--icon"><i class="fa fa-file-excel"></i> {{ __('Import from API Hiboutik') }}</span>
-                    </button>
+                    {{--<button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#modal-import-items-hiboutik" onClick=(setRestaurantId({{ $restorant_id }}))>
+                        <span class="btn-inner--icon"><i class="fa fa-file-excel"></i> {{ __('Import CSV from API Hiboutik') }}</span>
+                    </button> --}}
                     @endif
                     @if(config('settings.enable_miltilanguage_menus'))
                         @include('items.partials.languages')
