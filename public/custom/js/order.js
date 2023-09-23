@@ -449,7 +449,7 @@ function recalculatePrice(id, value) {
 }
 
 function getLocation(callback) {
-    $.ajaxSetup({
+    /*$.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
@@ -466,7 +466,7 @@ function getLocation(callback) {
         error: function(response) {
             return callback(false, response.responseJSON.errMsg);
         }
-    })
+    })*/
 }
 
 function initializeMap(lat, lng) {

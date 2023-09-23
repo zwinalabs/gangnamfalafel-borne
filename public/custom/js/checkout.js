@@ -100,7 +100,7 @@ $("#privacypolicy").change(function() {
 });
 
 var validateAddressInArea = function(positions, area){
-    var paths = [];
+    /*var paths = [];
 
     if(area !== null){
         area.forEach(location =>
@@ -119,7 +119,7 @@ var validateAddressInArea = function(positions, area){
                 }
             }, 100);
         });
-    }
+    }*/
 }
 
 

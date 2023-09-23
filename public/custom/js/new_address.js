@@ -67,7 +67,7 @@
                 var latAdd = data.lat;
                 var lngAdd = data.lng;
 
-                map = new google.maps.Map(document.getElementById('new_address_map'), {
+               /* map = new google.maps.Map(document.getElementById('new_address_map'), {
                     zoom: 17,
                     center: new google.maps.LatLng(data.lat, data.lng)
                 });
@@ -86,7 +86,7 @@
 
                     var latAdd = event.latLng.lat();
                     var lngAdd = event.latLng.lng();
-                });
+                });*/
             }
         });
     })

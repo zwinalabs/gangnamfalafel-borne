@@ -140,7 +140,7 @@ var $map = $('#map-canvas'),
 
 function initMap() {
 
-    map = document.getElementById('map-canvas');
+   /* map = document.getElementById('map-canvas');
     lat = map.getAttribute('data-lat');
     lng = map.getAttribute('data-lng');
 
@@ -171,7 +171,7 @@ function initMap() {
 
     google.maps.event.addListener(marker, 'click', function() {
         infowindow.open(map, marker);
-    });
+    });*/
 }
 
 if($map.length) {

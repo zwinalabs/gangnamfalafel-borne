@@ -164,7 +164,7 @@ Coded by www.creative-tim.com
 
 
      <!-- Google Map -->
-     <script async defer src="https://maps.googleapis.com/maps/api/js?libraries=geometry,drawing&key=<?php echo config('settings.google_maps_api_key'); ?>&libraries=places&callback=js.initializeGoogle"></script>
+    
 
     @if(strlen( config('broadcasting.connections.pusher.app_id'))>2)
         <!-- Pusher -->

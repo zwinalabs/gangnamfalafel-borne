@@ -3,7 +3,7 @@ var map, infoWindow, marker, lng, lat;
 function initMap() {}
 
 function initMapR(){
-    map = new google.maps.Map(document.getElementById('map'), {center: {lat: -34.397, lng: 150.644}, zoom: 15 });
+    /*map = new google.maps.Map(document.getElementById('map'), {center: {lat: -34.397, lng: 150.644}, zoom: 15 });
     marker = new google.maps.Marker({ position: {lat: -34.397, lng: 150.644}, map: map, title: 'Click to zoom'});
     infoWindow = new google.maps.InfoWindow;
 
@@ -31,11 +31,11 @@ function initMapR(){
         var currPos = new google.maps.LatLng(event.latLng.lat(),event.latLng.lng());
         marker.setPosition(currPos);
         changeLocation(event.latLng.lat(), event.latLng.lng());
-    });
+    });*/
 }
 
 function getLocation(callback){
-    $.ajaxSetup({
+    /*$.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
@@ -51,11 +51,11 @@ function getLocation(callback){
         }, error: function (response) {
            return callback(false, response.responseJSON.errMsg);
         }
-    })
+    })*/
 }
 
 function changeLocation(lat, lng){
-    $.ajaxSetup({
+    /*$.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
@@ -75,11 +75,11 @@ function changeLocation(lat, lng){
             }
         }, error: function (response) {
         }
-    })
+    })*/
 }
 
 function initMapA() {
-    map = new google.maps.Map(document.getElementById('map2'), {center: {lat: -34.397, lng: 150.644}, zoom: 15 });
+   /* map = new google.maps.Map(document.getElementById('map2'), {center: {lat: -34.397, lng: 150.644}, zoom: 15 });
     marker = new google.maps.Marker({ position: {lat: -34.397, lng: 150.644}, map: map, title: 'Click to zoom'});
     infoWindow = new google.maps.InfoWindow;
 
@@ -102,7 +102,7 @@ function initMapA() {
 
         lat = event.latLng.lat()
         lng = event.latLng.lng();
-    });
+    });*/
 }
 
 $("#submitNewAddress").on("click",function() {

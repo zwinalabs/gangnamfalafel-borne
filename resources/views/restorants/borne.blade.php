@@ -382,9 +382,11 @@
             </div>
         </div>
     </div>
+    <div id="cartListMobile" class="d-none">kkkk</div>
+    <div id="totalSubmit" class="d-none">kkkk</div>
 @endsection
 @if (isset($showGoogleTranslate)&&$showGoogleTranslate&&!$showLanguagesSelector)
-    @include('googletranslate::buttons')
+    
 @endif
 @if ($showLanguagesSelector)
     @section('addiitional_button_1')

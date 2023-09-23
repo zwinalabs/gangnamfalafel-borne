@@ -72,9 +72,7 @@
 @endsection
 
 @section('js')
-    <script async defer
-        src= "https://maps.googleapis.com/maps/api/js?key=<?php echo config('settings.google_maps_api_key'); ?>&callback=initMapA">
-    </script>
+    
     <script type="text/javascript">
         "use strict";
         var map, infoWindow, marker, lng, lat;

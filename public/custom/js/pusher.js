@@ -4,7 +4,7 @@ $(document).ready(function() {
     // Enable pusher logging - don't include this in production
     if(PUSHER_APP_KEY){
 
-        var audio = new Audio('http://gangnamfalafel-borne.test/custom/media/mp3/neworder.mp3');
+        var audio = new Audio('/custom/media/mp3/neworder.mp3');
 
         Pusher.logToConsole = false;
 
@@ -25,7 +25,7 @@ $(document).ready(function() {
     }
 
     function subscribePerOrder(orderID){
-        var audio = new Audio('http://gangnamfalafel-borne.test/custom/media/mp3/neworder.mp3');
+        var audio = new Audio('/custom/media/mp3/neworder.mp3');
 
         Pusher.logToConsole = false;
 

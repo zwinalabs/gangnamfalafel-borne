@@ -17,8 +17,8 @@ function getLiveOrders(){
 
 window.onload = function () {
 
-    var audio = new Audio('http://gangnamfalafel-borne.test/custom/media/mp3/neworder.mp3');
-    var welcomeAudio = new Audio('http://gangnamfalafel-borne.test/custom/media/mp3/welcome.mp3');
+    var audio = new Audio('/custom/media/mp3/neworder.mp3');
+    var welcomeAudio = new Audio('/custom/media/mp3/welcome.mp3');
 
     //VUE CART
     liveOrders = new Vue({

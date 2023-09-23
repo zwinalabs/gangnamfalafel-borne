@@ -81,9 +81,7 @@
 @endsection
 
 @section('js')
-<!-- Google Map -->
-<script async defer src= "https://maps.googleapis.com/maps/api/js?libraries=geometry,drawing&key=<?php echo config('settings.google_maps_api_key'); ?>"> </script>
-  
+<!-- Google Map --> 
 
     <script src="{{ asset('custom') }}/js/ratings.js"></script>
 @endsection
