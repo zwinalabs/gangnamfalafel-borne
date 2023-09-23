@@ -106,7 +106,7 @@
                 @if(!$restorant->categories->isEmpty())
                     <nav class="tabbable sticky" style="/*top: {{ config('app.isqrsaas') ? 75:88 }}px;*/">
                         <ul id="categories-items" class="nav nav-pills bg-white mb-2">
-                            <li class="nav-item nav-item-category ">
+                            <li class="nav-item nav-item-category " id="categall">
                                 <a class="nav-link  mb-sm-3 mb-md-0 active" data-toggle="tab" role="tab" href="" onClick="closeCurrentItem()">{{ __('All categories') }}</a>
                             </li>
                             @foreach ( $restorant->categories as $key => $category)
@@ -134,6 +134,13 @@
                                         <div id="item-listing-{{ $item->id }}" class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-6 pl-9px pr-9px">
                                             <div class="strip">
                                                 @if(!empty($item->image))
+                                                <figure>
+                                                    <a onClick="setCurrentItem({{ $item->id }});openCurrentItem({{ $item->id }});" href="javascript:void(0)">
+                                                        <img src="{{ $item->logom }}" loading="lazy" data-src="{{ config('global.restorant_details_image') }}" class="img-fluid lazy" alt="">
+                                                        <small class="food-item__quantity" style="display:none;"></small>
+                                                    </a>
+                                                </figure>
+                                                @else
                                                 <figure>
                                                     <a onClick="setCurrentItem({{ $item->id }});openCurrentItem({{ $item->id }});" href="javascript:void(0)">
                                                         <img src="{{ $item->logom }}" loading="lazy" data-src="{{ config('global.restorant_details_image') }}" class="img-fluid lazy" alt="">

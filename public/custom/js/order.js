@@ -351,7 +351,7 @@ function setCurrentItem(id) {
             $('#full-addToCartExpress').show();
             $('#full-quantity-express-bloc').hide();
     }
-    if (item.image != "/default/restaurant_large.jpg") {
+    if (item.image != "") {
         $("#full-modalImg").attr("src", item.image);
         $("#full-modalDialogItem").addClass("modal-lg");
         $("#full-modalImgPart").show();
@@ -622,7 +622,7 @@ $(".nav-item-category").on('click', function() {
     var category_id = id.substr(id.indexOf("_") + 1, id.length);
 
     $.each(categories, function(index, value) {
-        if (value != category_id) {
+        if (value != category_id && category_id != "categall") {
             $("." + value).hide();
         }
     });
