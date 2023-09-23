@@ -59,3 +59,6 @@ UPDATE `items` SET `price`=4.5, `product_id_hiboutik`=131 WHERE  `id`=372;
 -- 23-08-2023
 ALTER TABLE `orders`
 	ADD COLUMN `sale_id_hiboutik` BIGINT NULL DEFAULT NULL AFTER `kds_finished`;
+
+ALTER TABLE `companies` 
+	ADD COLUMN `auto_print_kitchen` INT NOT NULL DEFAULT 0  AFTER `code_pin`;
