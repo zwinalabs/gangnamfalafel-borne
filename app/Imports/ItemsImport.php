@@ -25,13 +25,13 @@ class ItemsImport implements ToModel, WithHeadingRow
      */
     public function model(array $row)
     {
-        $category = Categories::where(['name' => $row['category'], 'restorant_id' => $this->restorant->id])->first();
+        $category = Categories::where(['name' => strip_tags($row['category']), 'restorant_id' => $this->restorant->id])->first();
         $CATID=null;
         if($category != null){
             $CATID= $category->id;
         }else{
             //Check last inssert category
-            if($this->lastCategoryName==$row['category']){
+            if($this->lastCategoryName==strip_tags($row['category'])){
                 $CATID=$this->lastCategoryID;
             }
         }
@@ -42,27 +42,26 @@ class ItemsImport implements ToModel, WithHeadingRow
             if($item == null){       
                 return new Items([
                     'name' => $row['name'],
-                    'description' => $row['description']?$row['description']:"",
-                    'price' => $row['price'],
+                    'description' => $row['description']?strip_tags($row['description']):"",
+                    'price' => str_replace('€', '', strip_tags($row['price'])),
                     'category_id' => $CATID,
                     'image' => $row['image'] ? $row['image'] : "",
-                    'available' => $row['active'],
-                    'product_id_hiboutik' => $row['id'],
+                    'available' => strip_tags($row['active']),
+                    'product_id_hiboutik' => strip_tags($row['hiboutik']),
                 ]); 
             }else{
                 //Update
-                $item->price=$row['price'];
+                $item->price=strip_tags($row['price']);
                 $item->image =$row['image'] ? $row['image'] : "";
                 $item->category_id =$CATID;
-                $item->description =$row['description']?$row['description']:"";
-                $item->product_id_hiboutik = $row['description']?$row['description']:"";
-                $item->available = $row['active']?$row['active']:0;
-                $item->product_id_hiboutik = $row['id']?$row['id']:0;
-
+                $item->description =$row['description']?strip_tags($row['description']):"";
+                $item->available = strip_tags($row['active']);
+                $item->product_id_hiboutik = strip_tags($row['hiboutik']);
+                $item->save();
             }
         } else {
             $newCat=new Categories([
-                'name'=>$row['category'],
+                'name'=>strip_tags($row['category']),
                 'restorant_id'=>$this->restorant->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -76,13 +75,13 @@ class ItemsImport implements ToModel, WithHeadingRow
             
 
             return new Items([
-                'name' => $row['name'],
-                'description' => $row['description'],
-                'price' => $row['price'],
+                'name' => strip_tags($row['name']),
+                'description' => strip_tags($row['description']),
+                'price' => strip_tags($row['price']),
                 'category_id' => $categoryID,
                 'image' => $row['image'] ? $row['image'] : "",
-                'available' => $row['active'],
-                'product_id_hiboutik' => $row['id'],
+                'available' => strip_tags($row['active']),
+                'product_id_hiboutik' => strip_tags($row['hiboutik']),
             ]);
         }
     }
