@@ -11,13 +11,13 @@
             ['ftype'=>'input','name'=>"Restaurant address",'id'=>"address",'placeholder'=>"Restaurant address",'required'=>true,'value'=>$restorant->address],
             ['ftype'=>'input','name'=>"Restaurant phone",'id'=>"phone",'placeholder'=>"Restaurant phone",'required'=>true,'value'=>$restorant->phone],
             ['ftype'=>'input','name'=>"PIN Code",'id'=>"code_pin",'placeholder'=>"PIN Code",'required'=>true,'value'=>$restorant->code_pin],
+            ['ftype'=>'bool','name'=>"Auto Print Kitchen Receipt",'id'=>"auto_print_kitchen",'value'=>$restorant->auto_print_kitchen == 1 ? "true" : "false"],
         ]])
         @if(config('settings.multi_city'))
             @include('partials.fields',['fields'=>[
                 ['ftype'=>'select','name'=>"Restaurant city",'id'=>"city_id",'data'=>$cities,'required'=>true,'value'=>$restorant->city_id],
             ]])
         @endif
-       
         @if(auth()->user()->hasRole('admin'))
             <br/>
             <div class="row">

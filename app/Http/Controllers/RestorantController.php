@@ -177,6 +177,7 @@ class RestorantController extends Controller
         $restaurant->address = '';
         $restaurant->phone = $owner->phone;
         $restaurant->code_pin = $request->code_pin;
+        $restaurant->auto_print_kitchen = $request->auto_print_kitchen  == 'true' ? 1 : 0;
         $restaurant->subdomain = $this->makeAlias(strip_tags($request->name));
         $restaurant->save();
 
@@ -423,7 +424,7 @@ class RestorantController extends Controller
             $restaurant->is_featured = $request->is_featured != null ? 1 : 0;
         }
 
-        
+        $restaurant->auto_print_kitchen = $request->auto_print_kitchen  == 'true' ? 1 : 0;
         $restaurant->can_pickup = $request->can_pickup == 'true' ? 1 : 0;
         $restaurant->can_deliver = $request->can_deliver == 'true' ? 1 : 0;
         $restaurant->can_dinein = $request->can_dinein == 'true' ? 1 : 0;
