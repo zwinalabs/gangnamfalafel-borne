@@ -1197,7 +1197,11 @@ class OrderController extends Controller
                     $order->status()->attach(1, ['user_id'=>$order->restorant->user->id, 'comment'=>'Local Order Borne']);
                     $order->update();
                     //print all receipts
-                    $printReceiptResponse = $this->printReceipt($orderToPrint);
+                    $printReceiptResponse['p_borne'] = $this->printReceipt($orderToPrint);
+                    //Auto Print Kitchen Receipt
+                    if($order->restorant->auto_print_kitchen == 1){
+                        $printReceiptResponse['p_kitchen'] = $this->printReceiptKitchen($orderToPrint);
+                    }
                     //notify dashboard user
                     $this->notifyOwnerGanFal($order);
                     $errMsg = __("Payment")." ".__("Cash");
@@ -1224,7 +1228,11 @@ class OrderController extends Controller
                 $order->update();
                 //print all receipts
                 $orderToPrint['message'] = __("Pay at the cash");
-                $printReceiptResponse = $this->printReceipt($orderToPrint);
+                $printReceiptResponse['p_borne'] = $this->printReceipt($orderToPrint);
+                //Auto Print Kitchen Receipt
+                if($order->restorant->auto_print_kitchen == 1){
+                    $printReceiptResponse['p_kitchen'] = $this->printReceiptKitchen($orderToPrint);
+                }
                 //notify dashboard user
                 $this->notifyOwnerGanFal($order);
                 $errMsg = __("Payment")." ".__("Cash");
@@ -1272,7 +1280,11 @@ class OrderController extends Controller
                         $order->update();
                         $errMsg = '';
                         //print all receipts
-                        $printReceiptResponse = $this->printReceipt($orderToPrint);
+                        $printReceiptResponse['p_borne'] = $this->printReceipt($orderToPrint);
+                        //Auto Print Kitchen Receipt
+                        if($order->restorant->auto_print_kitchen == 1){
+                            $printReceiptResponse['p_kitchen'] = $this->printReceiptKitchen($orderToPrint);
+                        }
                         //notify dashboard user
                         $this->notifyOwnerGanFal($order);
                         $receipt = nl2br($eMonetiqueReceipt, false);
