@@ -35,3 +35,8 @@ window.app.config.productionTip = false;
 window.app.config.devtools = false;
 window.app.config.debug = false;
 window.app.config.silent = true;
+
+//production
+Vue.config.devtools = false;
+Vue.config.debug = false;
+Vue.config.silent = true; 
