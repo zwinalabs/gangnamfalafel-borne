@@ -930,7 +930,8 @@ class OrderController extends Controller
                 "total_gross"=>  number_format($total_net+$total_vat, 2)
             ];
             $orderToPrint['created_at'] = $order->created_at->locale(config('app.locale'))->isoFormat('YYYY-MM-DD HH:mm:ss');
-            $orderToPrint['message'] = __("Kitchen");
+            $pay_msg = ($order->payment_status == "unpaid")?"  ::  ".__("Unpaid"):"";
+            $orderToPrint['message'] = __("Kitchen").$pay_msg;
 
             //we start printing kitchen receipt 
             $print_message['kitchen'] = $this->printReceiptKitchen($orderToPrint);
