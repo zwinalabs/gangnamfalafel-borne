@@ -382,8 +382,8 @@
             </div>
         </div>
     </div>
-    <div id="cartListMobile" class="d-none">kkkk</div>
-    <div id="totalSubmit" class="d-none">kkkk</div>
+    <div id="cartListMobile" class="d-none">no-error</div>
+    <div id="totalSubmit" class="d-none">no-error</div>
 @endsection
 @if (isset($showGoogleTranslate)&&$showGoogleTranslate&&!$showLanguagesSelector)
     
